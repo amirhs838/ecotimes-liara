@@ -130,7 +130,7 @@ export default function CategoriesPage() {
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="مثلاً: بیمه عمر"
+            placeholder="مثلاً: هوش مصنوعی"
             className="bg-white border-zinc-300"
             maxLength={100}
           />

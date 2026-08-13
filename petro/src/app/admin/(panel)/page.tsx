@@ -59,7 +59,7 @@ export default async function AdminDashboardPage() {
         <div>
           <h1 className="text-2xl font-black text-zinc-900">داشبورد</h1>
           <p className="text-sm text-zinc-500 mt-1">
-            مدیریت محتوای پایگاه خبری بیمه نیوز
+            مدیریت محتوای پایگاه خبری اکوتایمز
           </p>
         </div>
         <Link

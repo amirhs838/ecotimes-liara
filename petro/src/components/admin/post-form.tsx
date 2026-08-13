@@ -631,7 +631,7 @@ export default function PostForm({
                 value={form.canonicalUrl}
                 onChange={(e) => set("canonicalUrl", e.target.value)}
                 className={`${inputCls} text-left`}
-                placeholder="https://ecotimes.ir/news/..."
+                placeholder="https://eco-times.ir/news/..."
               />
             </Field>
           </div>
@@ -643,7 +643,7 @@ export default function PostForm({
             </h3>
             <div className="border border-zinc-100 rounded-lg p-4 bg-zinc-50/50" dir="rtl">
               <div className="text-[12px] text-zinc-500 mb-1" dir="ltr">
-                bimenews.ir › news › {form.slug || "..."}
+                eco-times.ir › news › {form.slug || "..."}
               </div>
               <div className="text-[#1a0dab] text-lg leading-snug hover:underline cursor-pointer line-clamp-1">
                 {form.metaTitle || form.title || "تیتر خبر"}

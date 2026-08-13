@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "پنل مدیریت | بیمه نیوز",
+  title: "پنل مدیریت | اکوتایمز",
   robots: { index: false, follow: false },
 };
 

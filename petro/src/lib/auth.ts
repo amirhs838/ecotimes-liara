@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-export const SESSION_COOKIE = "bimenews_session";
+export const SESSION_COOKIE = "ecotimes_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days (seconds)
 
 export interface SessionPayload {

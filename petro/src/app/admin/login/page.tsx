@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
             ورود به پنل مدیریت
           </h1>
           <p className="text-xs text-zinc-500 mb-6">
-            مدیریت محتوای پایگاه خبری بیمه نیوز
+            مدیریت محتوای پایگاه خبری اکوتایمز
           </p>
 
           {error && (
@@ -125,7 +125,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center text-[11px] text-zinc-400 mt-6">
-          بیمه نیوز — پایگاه خبری صنعت بیمه ایران و جهان
+          اکوتایمز — پایگاه خبری اقتصاد و فناوری
         </p>
       </div>
     </div>
