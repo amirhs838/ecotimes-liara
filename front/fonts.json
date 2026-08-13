@@ -1,0 +1,60 @@
+{
+  "fonts": [
+    {
+      "family": "Arimo",
+      "style": "Bold",
+      "fontId": "Arimo_wght__1",
+      "source": "GOOGLE",
+      "cssFamily": "Arimo:Bold"
+    },
+    {
+      "family": "IRANSansX",
+      "style": "Medium",
+      "fontId": "C:\\USERS\\AMIRHS\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\IRANSANSX-MEDIUM.TTF",
+      "source": "LOCAL",
+      "cssFamily": "IRANSansX:Medium"
+    },
+    {
+      "family": "IRANSansX",
+      "style": "Bold",
+      "fontId": "C:\\USERS\\AMIRHS\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\IRANSANSX-BOLD.TTF",
+      "source": "LOCAL",
+      "cssFamily": "IRANSansX:Bold"
+    },
+    {
+      "family": "IRANSansX",
+      "style": "Regular",
+      "fontId": "C:\\WINDOWS\\FONTS\\IRANSANSX-REGULAR.TTF",
+      "source": "LOCAL",
+      "cssFamily": "IRANSansX:Regular"
+    },
+    {
+      "family": "IRANYekanX",
+      "style": "Black",
+      "fontId": "C:\\USERS\\AMIRHS\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\IRANYEKANX-BLACK.TTF",
+      "source": "LOCAL",
+      "cssFamily": "IRANYekanX:Black"
+    },
+    {
+      "family": "Inknut Antiqua",
+      "style": "Bold",
+      "fontId": "InknutAntiqua-Bold_2",
+      "source": "GOOGLE",
+      "cssFamily": "Inknut Antiqua:Bold"
+    },
+    {
+      "family": "Inter",
+      "style": "Bold",
+      "fontId": "Inter_1",
+      "source": "GOOGLE",
+      "cssFamily": "Inter:Bold"
+    },
+    {
+      "family": "Inter",
+      "style": "Medium",
+      "fontId": "Inter_1",
+      "source": "GOOGLE",
+      "cssFamily": "Inter:Medium"
+    }
+  ]
+}

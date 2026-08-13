@@ -1,0 +1,95 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-arimo: "Arimo:Bold", sans-serif;
+  --font-inknut: "Inknut Antiqua:Bold", serif;
+  --font-inter: "Inter:Medium", "Inter:Bold", sans-serif;
+}
+
+@font-face {
+  font-family: 'IRANSansX:Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/IRANSansX-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IRANSansX:Medium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./assets/fonts/IRANSansX-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IRANSansX:Bold';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/fonts/IRANSansX-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IRANSansX';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/IRANSansX-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IRANSansX';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./assets/fonts/IRANSansX-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IRANSansX';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/fonts/IRANSansX-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IRANYekanX:Black';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('./assets/fonts/IRANYekanX-Black.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Arimo:Bold';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://static.figma.com/font/Arimo_wght__1') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inknut Antiqua:Bold';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://static.figma.com/font/InknutAntiqua-Bold_2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter:Bold';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter:Medium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+}

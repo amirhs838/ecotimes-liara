@@ -1,0 +1,12 @@
+{
+  "name": "eco-times-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:backend": "npm --prefix petro run dev",
+    "dev:front": "npm --prefix front run dev",
+    "build:backend": "npm --prefix petro run build",
+    "build:front": "npm --prefix front run build"
+  }
+}
