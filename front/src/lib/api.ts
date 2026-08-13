@@ -46,12 +46,17 @@ export function articleUrl(href: string | null): string | null {
   return `${API_URL}${href}`;
 }
 
-export async function fetchHomeData(): Promise<HomeData> {
-  const res = await fetch(`${API_URL}/api/public/home`);
-  if (!res.ok) throw new Error(`home api responded ${res.status}`);
-  const json = await res.json();
-  if (!json.ok) throw new Error("home api responded not-ok");
-  return json.data as HomeData;
+let homeDataPromise: Promise<HomeData> | null = null;
+
+export function fetchHomeData(): Promise<HomeData> {
+  homeDataPromise ??= (async () => {
+    const res = await fetch(`${API_URL}/api/public/home`);
+    if (!res.ok) throw new Error(`home api responded ${res.status}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error("home api responded not-ok");
+    return json.data as HomeData;
+  })();
+  return homeDataPromise;
 }
 
 export async function fetchMarket(): Promise<MarketItem[] | null> {

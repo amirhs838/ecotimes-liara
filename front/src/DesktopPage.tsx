@@ -283,7 +283,14 @@ function DesktopHeader() {
     <header>
       <div className="bg-[#c93035] text-white">
         <div className="mx-auto flex h-[88px] max-w-[1280px] items-center justify-between px-7">
-          <button aria-label="منو" className="grid size-11 place-items-center" type="button">
+          <button
+            aria-label="منو"
+            className="grid size-11 place-items-center"
+            onClick={() => {
+              window.location.href = `${API_URL}/admin`;
+            }}
+            type="button"
+          >
             <MenuIcon />
           </button>
           <img alt="ECO TIMES" className="h-[76px] w-[102px] object-contain" src={footerLogo} />
