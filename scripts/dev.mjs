@@ -5,7 +5,8 @@ import { fileURLToPath } from "node:url";
 const base = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const jobs = [
-  { name: "backend", cwd: join(base, "petro"), cmd: "npm", args: ["run", "dev"] },
+  // backend's own dev script pipes through Unix `tee`; spawn next directly so it also works on Windows
+  { name: "backend", cwd: join(base, "petro"), cmd: "npx", args: ["next", "dev", "-p", "3000"] },
   { name: "front", cwd: join(base, "front"), cmd: "npm", args: ["run", "dev"] },
 ];
 
