@@ -30,7 +30,7 @@ export type HomeData = {
   live: { enabled: boolean; title: string } | null;
 };
 
-const API_URL = String(import.meta.env.VITE_API_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const API_URL = String(import.meta.env.VITE_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
 
 export function absoluteAsset(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
