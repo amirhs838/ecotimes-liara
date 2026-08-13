@@ -31,6 +31,7 @@ const homeSections = [
   { key: "hero", name: "خبر ویژه (هیرو)", capacity: 1 },
   { key: "videos", name: "ویدیوهای پرطرفدار", capacity: 6 },
   { key: "photos", name: "اسلایدشوی عکس", capacity: 6 },
+  { key: "top-stories", name: "اخبار برتر (سایدبار)", capacity: 8 },
   { key: "ai", name: "بلوک هوش مصنوعی", capacity: 13 },
   { key: "digital-economy", name: "بلوک اقتصاد دیجیتال", capacity: 3 },
   { key: "health", name: "بلوک سلامت و درمان", capacity: 1 },

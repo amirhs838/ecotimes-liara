@@ -22,7 +22,7 @@ export async function OPTIONS() {
 
 // GET /api/public/home — everything the frontend homepage needs in one call.
 export async function GET() {
-  const [breaking, hero, videos, photos, magazine, digitalEconomy, latest, mostViewed, nav, live] =
+  const [breaking, hero, videos, photos, magazine, digitalEconomy, topStories, latest, mostViewed, nav, live] =
     await Promise.all([
       getHomeSectionPosts("breaking"),
       getHomeSectionPosts("hero"),
@@ -30,7 +30,8 @@ export async function GET() {
       getHomeSectionPosts("photos"),
       getHomeSectionPosts("magazine"),
       getHomeSectionPosts("digital-economy"),
-      getLatestPosts(6),
+      getHomeSectionPosts("top-stories"),
+      getLatestPosts(12),
       getMostViewedPosts(8),
       getNavCategories(),
       getLiveStream(),
@@ -47,6 +48,7 @@ export async function GET() {
           photos,
           magazine,
           "digital-economy": digitalEconomy,
+          "top-stories": topStories,
         },
         latest,
         mostViewed,
