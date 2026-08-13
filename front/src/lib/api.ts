@@ -22,6 +22,8 @@ export type HomePost = {
 
 export type NavItem = { label: string; href: string; hot?: boolean };
 
+export type MarketItem = [string, string, string];
+
 export type HomeData = {
   sections: Record<string, HomePost[]>;
   latest: HomePost[];
@@ -30,7 +32,7 @@ export type HomeData = {
   live: { enabled: boolean; title: string } | null;
 };
 
-const API_URL = String(import.meta.env.VITE_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
+export const API_URL = String(import.meta.env.VITE_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
 
 export function absoluteAsset(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
@@ -50,4 +52,16 @@ export async function fetchHomeData(): Promise<HomeData> {
   const json = await res.json();
   if (!json.ok) throw new Error("home api responded not-ok");
   return json.data as HomeData;
+}
+
+export async function fetchMarket(): Promise<MarketItem[] | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/public/market`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!json.ok) return null;
+    return json.data.items as MarketItem[];
+  } catch {
+    return null;
+  }
 }

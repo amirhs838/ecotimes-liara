@@ -28,8 +28,9 @@ import galleryFour from "./imports/DivScrollSpyContainer/701a8229b01625d046449a8
 import galleryFive from "./imports/DivScrollSpyContainer/723884ecb125e94828d6870c0c6de46d2dbd6a7a.png";
 import footerLogo from "./imports/DivScrollSpyContainer/5ebe0a821e4b54a4e643c895ba1be6a544f83528.png";
 import type { ReactNode } from "react";
-import { absoluteAsset, articleUrl, type HomePost } from "./lib/api";
-import { useHomeData } from "./lib/use-home-data";
+import { useState } from "react";
+import { API_URL, absoluteAsset, articleUrl, type HomePost } from "./lib/api";
+import { useHomeData, useMarket } from "./lib/use-home-data";
 
 type NewsItem = {
   category: string;
@@ -213,32 +214,43 @@ function StoryLink({
   href,
   block = false,
   className = "",
+  onClick,
   children,
 }: {
   href?: string | null;
   block?: boolean;
   className?: string;
+  onClick?: () => void;
   children: ReactNode;
 }) {
   const cls = `${block ? "block " : ""}no-underline text-inherit ${className}`.trim();
-  if (!href) return <span className={cls}>{children}</span>;
+  if (!href) return <span className={cls} onClick={onClick}>{children}</span>;
   return (
-    <a className={cls} href={href}>
+    <a className={cls} href={href} onClick={onClick}>
       {children}
     </a>
   );
 }
+
 function zipNews(posts: HomePost[], count: number, fallback: NewsItem[]): NewsItem[] {
-  const slice = posts.slice(0, count);
-  if (slice.length === 0) return fallback;
-  return slice.map((post, index) => {
+  return Array.from({ length: count }, (_, index) => {
+    const post = posts[index];
     const base = fallback[index % fallback.length];
+    if (!post) return base;
     return {
       category: post.category || base.category,
       title: post.title,
       image: absoluteAsset(post.imageUrl) ?? base.image,
       href: articleUrl(post.href),
     };
+  });
+}
+
+function zipText(posts: HomePost[], count: number, fallback: { title: string; href: string | null }[]) {
+  return Array.from({ length: count }, (_, index) => {
+    const post = posts[index];
+    if (!post) return fallback[index % fallback.length];
+    return { title: post.title, href: articleUrl(post.href) };
   });
 }
 
@@ -266,6 +278,7 @@ function NewsCard({ item }: { item: NewsItem }) {
 }
 
 function DesktopHeader() {
+  const marketRows = useMarket() ?? marketItems;
   return (
     <header>
       <div className="bg-[#c93035] text-white">
@@ -281,14 +294,21 @@ function DesktopHeader() {
       </div>
       <nav className="border-b border-[#cbced4] bg-white" aria-label="دسته‌بندی‌ها">
         <div className="mx-auto flex h-[52px] max-w-[1280px] items-center justify-center gap-10 px-7 text-[14px] font-bold text-[#141618]">
-          {['اقتصاد دیجیتال', 'سلامت و درمان', 'هوش مصنوعی', 'انرژی', 'ویدئو', 'عکس'].map((item) => (
-            <a className="transition-colors hover:text-[#990108]" href="#" key={item}>{item}</a>
+          {[
+            ["اقتصاد دیجیتال", `${API_URL}/category/digital-economy`],
+            ["سلامت و درمان", `${API_URL}/category/health`],
+            ["هوش مصنوعی", `${API_URL}/category/ai`],
+            ["انرژی", `${API_URL}/category/energy`],
+            ["ویدئو", "#videos"],
+            ["عکس", "#photos"],
+          ].map(([label, href]) => (
+            <a className="transition-colors hover:text-[#990108]" href={href} key={label}>{label}</a>
           ))}
         </div>
       </nav>
       <div className="overflow-hidden border-b border-[#cbced4] bg-[rgba(255,255,255,.95)]" dir="ltr">
         <div className="mx-auto flex h-[48px] max-w-[1280px] items-center justify-between gap-8 px-7 font-['Arimo:Bold',sans-serif]">
-          {marketItems.map(([symbol, value, change]) => (
+          {marketRows.map(([symbol, value, change]) => (
             <div className="flex items-center gap-2 whitespace-nowrap" key={symbol}>
               <span className="text-[11px] tracking-[.85px] text-[#687086]">{symbol}</span>
               <strong className="text-[13px] text-[#121728]">{value}</strong>
@@ -305,27 +325,42 @@ function DesktopHeader() {
 function DesktopPage() {
   const home = useHomeData();
   const leadStories = home ? zipNews(home.latest, 6, staticLeadStories) : staticLeadStories;
-  const latestStories = home ? zipNews(home.sections.breaking ?? [], 6, staticLatestStories) : staticLatestStories;
+  const latestStories = home ? zipNews(home.latest.slice(6), 6, staticLatestStories) : staticLatestStories;
   const videoPool = home?.sections.videos ?? [];
-  const videoStories = videoPool.length ? zipNews(videoPool, 3, staticVideoStories) : staticVideoStories;
-  const asideVideo = videoPool[3] ?? videoPool[0] ?? null;
+  const videoStories = home ? zipNews(videoPool.slice(1), 3, staticVideoStories) : staticVideoStories;
+  const asideVideo = videoPool[0] ?? null;
   const digitalStories = home ? zipNews(home.sections["digital-economy"] ?? [], 3, staticDigitalStories) : staticDigitalStories;
-  const topStories =
-    home && home.mostViewed.length
-      ? home.mostViewed.slice(0, 5).map((post) => ({ title: post.title, href: articleUrl(post.href) }))
-      : staticTopStories;
+  const topSource = home?.sections["top-stories"]?.length ? home.sections["top-stories"] : home?.mostViewed ?? [];
+  const topStories = home ? zipText(topSource, 5, staticTopStories) : staticTopStories;
   const magazinePosts = home?.sections.magazine ?? [];
   const magazineMain = magazinePosts[0] ?? null;
-  const resilienceStories =
-    magazinePosts.length > 1
-      ? magazinePosts.slice(1, 5).map((post) => ({ title: post.title, description: post.lead, href: articleUrl(post.href) }))
-      : staticResilienceStories;
+  const resilienceStories = home
+    ? Array.from({ length: 4 }, (_, index) => {
+        const post = magazinePosts[index + 1];
+        return post
+          ? { title: post.title, description: post.lead, href: articleUrl(post.href) }
+          : staticResilienceStories[index % staticResilienceStories.length];
+      })
+    : staticResilienceStories;
   const heroPost = home?.sections.hero?.[0] ?? null;
   const galleryPhotos = home?.sections.photos ?? [];
-  const galleryTitle = galleryPhotos[0]?.title ?? "گرامیداشت روز ملی صنعت و معدن با حضور رئیس جمهور";
-  const galleryImages = [galleryOne, galleryTwo, galleryThree, galleryFour, galleryFive].map(
-    (fallback, index) => absoluteAsset(galleryPhotos[index]?.imageUrl) ?? fallback
-  );
+  const gallerySlots = [galleryOne, galleryTwo, galleryThree, galleryFour, galleryFive].map((fallback, index) => {
+    const post = galleryPhotos[index];
+    return {
+      image: absoluteAsset(post?.imageUrl) ?? fallback,
+      href: articleUrl(post?.href ?? null),
+      title: post?.title ?? null,
+    };
+  });
+  const [galleryOrder, setGalleryOrder] = useState([0, 1, 2, 3, 4]);
+  const bigSlot = gallerySlots[galleryOrder[0] % gallerySlots.length];
+  const galleryTitle = bigSlot.title ?? "گرامیداشت روز ملی صنعت و معدن با حضور رئیس جمهور";
+  const swapGallery = (index: number) =>
+    setGalleryOrder((order) => {
+      const next = [...order];
+      [next[0], next[index]] = [next[index], next[0]];
+      return next;
+    });
 
   return (
     <div className="min-h-screen bg-white font-['IRANSansX',sans-serif] text-[#141618]" dir="rtl">
@@ -387,7 +422,7 @@ function DesktopPage() {
           </div>
         </section>
 
-        <section className="bg-[#000e2c] py-12">
+        <section className="bg-[#000e2c] py-12" id="videos">
           <div className="mx-auto max-w-[1280px] px-7">
             <SectionHeading dark>ویدئو</SectionHeading>
             <div className="grid grid-cols-3 gap-7">
@@ -509,18 +544,21 @@ function DesktopPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-[1280px] px-7 py-14">
+        <section className="mx-auto max-w-[1280px] px-7 py-14" id="photos">
           <SectionHeading>عکس</SectionHeading>
           <h3 className="mb-6 text-[24px] font-bold">{galleryTitle}</h3>
           <div className="grid grid-cols-12 grid-rows-2 gap-3">
-            <StoryLink href={articleUrl(galleryPhotos[0]?.href ?? null)} className="contents">
-              <img alt={galleryTitle} className="col-span-6 row-span-2 h-[520px] w-full rounded-[6px] object-cover" src={galleryImages[0]} />
+            <StoryLink href={bigSlot.href} className="contents">
+              <img alt={galleryTitle} className="col-span-6 row-span-2 h-[520px] w-full rounded-[6px] object-cover" src={bigSlot.image} />
             </StoryLink>
-            {galleryImages.slice(1).map((image, index) => (
-              <StoryLink href={articleUrl(galleryPhotos[index + 1]?.href ?? null)} className="contents" key={image}>
-                <img alt={galleryTitle} className="col-span-3 h-[254px] w-full rounded-[6px] object-cover" src={image} />
-              </StoryLink>
-            ))}
+            {galleryOrder.slice(1).map((slotIndex) => {
+              const slot = gallerySlots[slotIndex];
+              return (
+                <StoryLink className="contents cursor-pointer" key={slotIndex} onClick={() => swapGallery(slotIndex)}>
+                  <img alt={slot.title ?? galleryTitle} className="col-span-3 h-[254px] w-full rounded-[6px] object-cover" src={slot.image} />
+                </StoryLink>
+              );
+            })}
           </div>
         </section>
       </main>

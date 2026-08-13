@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchHomeData, type HomeData } from "./api";
+import { fetchHomeData, fetchMarket, type HomeData, type MarketItem } from "./api";
 
 export function useHomeData(): HomeData | null {
   const [data, setData] = useState<HomeData | null>(null);
@@ -19,4 +19,20 @@ export function useHomeData(): HomeData | null {
   }, []);
 
   return data;
+}
+
+export function useMarket(): MarketItem[] | null {
+  const [items, setItems] = useState<MarketItem[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMarket().then((payload) => {
+      if (!cancelled && payload) setItems(payload);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return items;
 }
