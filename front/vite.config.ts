@@ -38,9 +38,6 @@ export default defineConfig(({ mode }) => {
       proxy: Object.fromEntries(
         [
           '/api',
-          '/admin',
-          '/news',
-          '/category',
           '/sitemap.xml',
           '/robots.txt',
           '/feed.xml',
@@ -55,7 +52,6 @@ export default defineConfig(({ mode }) => {
           '/ecotimes-logo-red.png',
           '/ecotimes-logo-red2.png',
           '/ecotimes-logo-white.png',
-          '/_next',
         ].map((route) => [route, { target: backendUrl, changeOrigin: false }])
       ),
     },
