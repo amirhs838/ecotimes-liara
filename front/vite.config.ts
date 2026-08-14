@@ -9,6 +9,7 @@ import siteConfiguration from './.figma/make/site.json'
 export default defineConfig(({ mode }) => {
   // .figma/make/deploy-preview passes `--mode development` for cached-preview builds.
   const emitSourcemaps = mode === 'development'
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001'
 
   return {
     base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/',
@@ -34,6 +35,29 @@ export default defineConfig(({ mode }) => {
       port: parseInt(process.env.PORT || '8443'),
       strictPort: true,
       watch: { ignored: ['**/.figma/**'] },
+      proxy: Object.fromEntries(
+        [
+          '/api',
+          '/admin',
+          '/news',
+          '/category',
+          '/sitemap.xml',
+          '/robots.txt',
+          '/feed.xml',
+          '/manifest.json',
+          '/images',
+          '/videos',
+          '/icons',
+          '/placeholders',
+          '/og-default.png',
+          '/icon.png',
+          '/apple-icon.png',
+          '/ecotimes-logo-red.png',
+          '/ecotimes-logo-red2.png',
+          '/ecotimes-logo-white.png',
+          '/_next',
+        ].map((route) => [route, { target: backendUrl, changeOrigin: false }])
+      ),
     },
     preview: {
       host: '0.0.0.0',
