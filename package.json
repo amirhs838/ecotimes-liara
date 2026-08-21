@@ -6,7 +6,9 @@
     "dev": "node scripts/dev.mjs",
     "dev:backend": "npm --prefix petro run dev",
     "dev:front": "npm --prefix front run dev",
+    "build": "npm run build:backend && npm run build:front",
     "build:backend": "npm --prefix petro run build",
-    "build:front": "npm --prefix front run build"
+    "build:front": "npm --prefix front run build",
+    "start": "node scripts/start.mjs"
   }
 }

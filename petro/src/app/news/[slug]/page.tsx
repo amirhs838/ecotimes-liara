@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { decodeParam } from "@/lib/url-param";
@@ -22,6 +23,24 @@ import {
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+/** Converts watch/share links into playable embed URLs (Aparat + YouTube). */
+function videoEmbedUrl(url: string | null, type: string | null): string | null {
+  if (!url || !type) return url;
+  if (type === "APARAT") {
+    const m = url.match(/aparat\.com\/(?:v|watch\/video)\/([a-zA-Z0-9]+)/);
+    if (m) return `https://www.aparat.com/video/video/embed/videohash/${m[1]}/vt/frame`;
+    if (url.includes("video/embed/videohash")) return url;
+    return url;
+  }
+  if (type === "YOUTUBE") {
+    const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (m) return `https://www.youtube.com/embed/${m[1]}`;
+    if (url.includes("youtube.com/embed/")) return url;
+    return url;
+  }
+  return url;
+}
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -221,17 +240,19 @@ export default async function NewsPage({ params }: Params) {
             </div>
           </header>
 
-          {/* Main image */}
+          {/* Main image — rendered at the image's own aspect ratio
+              (square, portrait/phone-shaped, landscape...) */}
           {image && (
             <figure className="mb-6">
-              <div className="relative overflow-hidden rounded-xl bg-zinc-100 aspect-[16/9]">
-                <SmartImage
+              <div className="relative overflow-hidden rounded-xl bg-zinc-100">
+                <Image
                   src={image.url}
                   alt={imageAlt}
-                  ratio="auto"
-                  category={post.category.slug}
+                  width={image.width ?? 1200}
+                  height={image.height ?? 675}
                   priority
-                  className="!w-full !h-full"
+                  sizes="(max-width: 768px) 100vw, 800px"
+                  className="w-full h-auto"
                 />
               </div>
               <figcaption className="text-[11px] text-zinc-400 mt-2">
@@ -260,12 +281,17 @@ export default async function NewsPage({ params }: Params) {
             post.videoUrl && (
               <div className="mb-6">
                 <iframe
-                  src={post.videoUrl}
+                  src={videoEmbedUrl(post.videoUrl, post.videoType) ?? ""}
                   title={post.title}
                   allowFullScreen
+                  loading="lazy"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   className="w-full rounded-xl bg-zinc-900 aspect-video border-0"
                 />
+                <div className="text-[11px] text-zinc-400 mt-1.5">
+                  پخش آنلاین از{" "}
+                  {post.videoType === "APARAT" ? "آپارات" : "یوتیوب"}
+                </div>
               </div>
             )}
 

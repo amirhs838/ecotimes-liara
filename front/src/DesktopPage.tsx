@@ -1,187 +1,32 @@
-import leadImage from "./imports/DivScrollSpyContainer/1f369ec9c752c5ebe514f523bde92d9cca2d8186.png";
-import videoCover from "./imports/DivScrollSpyContainer/f0bc7b6eb0394faadd792ee110aef1c4d491a399.png";
-import healthImage from "./imports/DivScrollSpyContainer/47a2a67f4f2837b8636b645b748e016e996b8314.png";
-import serumImage from "./imports/DivScrollSpyContainer/5a079c71bdc9cc31fa323f7aa572956db3f22727.png";
-import digitalHealthImage from "./imports/DivScrollSpyContainer/7ec078a70741686ed79bfc5397debeaf7e45afe5.png";
-import stressImage from "./imports/DivScrollSpyContainer/a4e9d7a9d621e2d06e109090fd9ca69a3f4b408d.png";
-import governanceImage from "./imports/DivScrollSpyContainer/b6c48806909862cbb8a52c56fa301365073a2662.png";
-import brainImage from "./imports/DivScrollSpyContainer/5b32298064da7b3e45f20313ad4e3f961a80c02b.png";
-import firstVideoImage from "./imports/DivScrollSpyContainer/c68f4f0be23326ed17de4525253731cb88f7cdda.png";
-import secondVideoImage from "./imports/DivScrollSpyContainer/6d48b2e124f6406b1a9cac2d6c8762d12b5b199d.png";
-import thirdVideoImage from "./imports/DivScrollSpyContainer/97f92a52e6ee7c160c6efcc5075091f08d7ccddf.png";
-import magazineCover from "./imports/DivScrollSpyContainer/48f91a8cb84a3336a75764a4715ae0f6f49026a5.png";
-import digitalMainImage from "./imports/DivScrollSpyContainer/bf41736ae5a0e090ce95ba71f1fd7f7b7a137c1a.png";
-import digitalSecondImage from "./imports/DivScrollSpyContainer/e3d923e2d4264cb7f5d7927105c246c7f1396613.png";
-import digitalThirdImage from "./imports/DivScrollSpyContainer/3538b62f506278deac80220dce6d979fcb279556.png";
 import advertiseImage from "./imports/DivScrollSpyContainer/9c3bea2ab16af8de0d4b67b15f6646a6b15243bc.png";
 import wallexImage from "./imports/DivScrollSpyContainer/6334ff254527b64d0a4b3e95213654683cd6fabe.png";
-import latestOneImage from "./imports/DivScrollSpyContainer/0a57b56d5863c25159cde44728c21dfe46688eb1.png";
-import latestTwoImage from "./imports/DivScrollSpyContainer/06a12c4088a414b34652477f501112976622487a.png";
-import latestThreeImage from "./imports/DivScrollSpyContainer/5ebfcbea5b4121c2a3f40be1905ded5f15f8330c.png";
-import latestFourImage from "./imports/DivScrollSpyContainer/0cbbe013a74781f429e324cb05567c24294e0cf2.png";
-import latestFiveImage from "./imports/DivScrollSpyContainer/a73e24e8094e75a5627f6ef99c40701412959dcc.png";
-import latestSixImage from "./imports/DivScrollSpyContainer/020c2945301494dba1398e57ab63d4d457a4423e.png";
-import galleryOne from "./imports/DivScrollSpyContainer/7586824e423d3839b8ce72c1d9f6214d34faf8e0.png";
-import galleryTwo from "./imports/DivScrollSpyContainer/e7b819ab3fbf8af6b0abf14df0b693b0b0a7fed3.png";
-import galleryThree from "./imports/DivScrollSpyContainer/b37d429ee7d8375ebb4f33904b24096fe3ff35c3.png";
-import galleryFour from "./imports/DivScrollSpyContainer/701a8229b01625d046449a82f68b657c4e48a84f.png";
-import galleryFive from "./imports/DivScrollSpyContainer/723884ecb125e94828d6870c0c6de46d2dbd6a7a.png";
-import footerLogo from "./imports/DivScrollSpyContainer/5ebe0a821e4b54a4e643c895ba1be6a544f83528.png";
+import coinBtcImage from "./imports/DivScrollSpyContainer/c05bf090b9669767870e5de4641445ccc4eb261c.png";
+import coinEthImage from "./imports/DivScrollSpyContainer/ba64993282e1849c68688dc61507ba8d638efc1d.png";
+import coinBnbImage from "./imports/DivScrollSpyContainer/ea96dd87c4daee1c1c7de083c6be3f74487bd602.png";
+import coinXrpImage from "./imports/DivScrollSpyContainer/072c287437aa52016c1b5a6470ea0a9c665e68b3.png";
+import coinSolImage from "./imports/DivScrollSpyContainer/13fc82c7bdbbc2e1b4ebef690ef9ba20e913a018.png";
+import coinTrxImage from "./imports/DivScrollSpyContainer/coin-5.png";
+import coinHypeImage from "./imports/DivScrollSpyContainer/coin-6.png";
+import logoImage from "./imports/DivScrollSpyContainer/logo.png";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { API_URL, absoluteAsset, articleUrl, type HomePost } from "./lib/api";
-import { useHomeData, useMarket } from "./lib/use-home-data";
+import { API_URL, absoluteAsset, articleUrl, type HomePost, type NavItem } from "./lib/api";
+import { useHomeData, useHomeFailed, useMarket } from "./lib/use-home-data";
+import TickerMarquee from "./TickerMarquee";
+import LoadingScreen from "./LoadingScreen";
+import AutoPlayVideo from "./AutoPlayVideo";
 
-type NewsItem = {
-  category: string;
-  title: string;
-  image: string;
-  href?: string | null;
+const tickerSymbols = ["BTC", "ETH", "BNB", "XRP", "SOL", "TRX", "HYPE"];
+
+const coinImages: Record<string, string> = {
+  BTC: coinBtcImage,
+  ETH: coinEthImage,
+  BNB: coinBnbImage,
+  XRP: coinXrpImage,
+  SOL: coinSolImage,
+  TRX: coinTrxImage,
+  HYPE: coinHypeImage,
 };
-
-const staticLeadStories: NewsItem[] = [
-  {
-    category: "سلامت و درمان",
-    title: "هوش مصنوعی در اتاق عمل؛ افزایش دقت جراحی با استفاده از فناوری‌های هوشمند",
-    image: healthImage,
-  },
-  {
-    category: "سلامت و درمان",
-    title: "سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسان",
-    image: serumImage,
-  },
-  {
-    category: "اقتصاددیجیتال",
-    title: "تحول دیجیتال در خدمات درمانی بریتانیا با استفاده از هوش مصنوعی",
-    image: digitalHealthImage,
-  },
-  {
-    category: "سلامت و درمان",
-    title: "برچسب هوشمند پایش لحظه ­ای استرس",
-    image: stressImage,
-  },
-  {
-    category: "اقتصاددیجیتال",
-    title: "معماری جدید حکمرانی علم و فناوری کلید خورد",
-    image: governanceImage,
-  },
-  {
-    category: "هوش مصنوعی",
-    title: "هوش مصنوعی برای پیشگیری از بیماری‌های مغزی",
-    image: brainImage,
-  },
-];
-
-const staticTopStories: { title: string; href: string | null }[] = [
-  { title: "فناوری ویرایش ژن به دنبال حذف ریشه‌ای HIV از بدن انسان", href: null },
-  { title: "هوش مصنوعی در خدمت مقابله با تهدیدات زیستی", href: null },
-  { title: "بازار نرم‌افزارهای مدیریت کربن شتاب گرفت", href: null },
-  { title: "بالکن‌ها به نیروگاه‌های کوچک خورشیدی تبدیل می‌شوند", href: null },
-  { title: "هوش مصنوعی فرآیند توسعه دارو را متحول کرد", href: null },
-  { title: "دانش‌بنیان‌ها؛ حلقه مفقوده بهره‌وری در اقتصاد ایران", href: null },
-  { title: "سامسونگ وارد عصر ربات‌ها شد", href: null },
-];
-
-const staticVideoStories: NewsItem[] = [
-  {
-    category: "میکرو الکترونیک",
-    title: "انقلاب نوری در دنیای تراشه‌ها؛ دانشمندان مسیر حرکت الکترون‌ها را با لیزر کنترل کردند",
-    image: firstVideoImage,
-  },
-  {
-    category: "سلامت و درمان",
-    title: "از اسکن قرنیه تا شخصی سازی لنز در ۲۰ دقیقه",
-    image: secondVideoImage,
-  },
-  {
-    category: "انرژی",
-    title: "نسل جدید عملیات مبتنی بر هوش مصنوعی در صنعت نفت و گاز",
-    image: thirdVideoImage,
-  },
-];
-
-const staticResilienceStories: { title: string; description: string; href: string | null }[] = [
-  {
-    title: "کشاورزی هوشمند برای تولید بیشتر با منابع کمتر",
-    description:
-      "گرمایش زمین، افزایش هزینه‌های کشاورزی و کاهش بهره‌وری محصولات، تولید غذا را به یکی از چالش‌های بزرگ جهان تبدیل کرده است",
-    href: null,
-  },
-  {
-    title: "مدیریت هوشمند آب با کمک هوش مصنوعی",
-    description: "او مدعی شد می‌تواند بازار فناوری را یک‌پارچه کند؛ اما حقیقت پیچیده‌تر بود",
-    href: null,
-  },
-  {
-    title: "هوش مصنوعی در خدمت مقابله با تهدیدات زیستی",
-    description: "نسل جدیدی از بیمه‌نامه‌های زندگی که ایرانیان را به پس‌انداز تشویق می‌کند",
-    href: null,
-  },
-  {
-    title: "هوش مصنوعی فرآیند توسعه دارو را متحول کرد",
-    description: "هوش مصنوعی در حال تغییر روند تحقیق و توسعه دارو است",
-    href: null,
-  },
-];
-
-const staticDigitalStories: NewsItem[] = [
-  {
-    category: "تماس تبلیغاتی ناخواسته در فرانسه ممنوع شد",
-    title:
-      "در فرانسه، تماس‌های تلفنی بی‌وقفه برای تبلیغ پنل‌های خورشیدی، سقف‌ها، پمپ‌های حرارتی و سایر اقلام از روز سه‌شنبه ۱۱ اوت با اجرای قانون ممنوعیت تماس‌های تلفنی ناخواسته، ممنوع خواهد شد",
-    image: digitalMainImage,
-  },
-  {
-    category: "اقتصاد دیجیتال",
-    title: "حمله سایبری گسترده علیه بخش‌های هوانوردی، انرژی و آموزش امارات",
-    image: digitalSecondImage,
-  },
-  {
-    category: "اقتصاد دیجیتال",
-    title: "توسعه کشور در شرایط جنگی متوقف نشد/کاهش زمان ‌پاسخگویی به مردم",
-    image: digitalThirdImage,
-  },
-];
-
-const staticLatestStories: NewsItem[] = [
-  {
-    category: "اقتصاد دیجیتال",
-    title: "قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران",
-    image: latestOneImage,
-  },
-  {
-    category: "اقتصاد دیجیتال",
-    title: "بانک توسعه فناوری و ابزارهای نوین مالی؛ بسته جدید صندوق برای زیست‌بوم نوآوری",
-    image: latestTwoImage,
-  },
-  {
-    category: "سلامت و درمان",
-    title: "سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسان",
-    image: latestThreeImage,
-  },
-  {
-    category: "سلامت و درمان",
-    title: "نسخه آزمایشگاهی مغز، امید تازه‌ای برای بیماران مبتلا به آلزایمر",
-    image: latestFourImage,
-  },
-  {
-    category: "انرژی‌",
-    title: "نسل جدید عملیات مبتنی بر هوش مصنوعی در صنعت نفت و گاز",
-    image: latestFiveImage,
-  },
-  {
-    category: "انرژی",
-    title: "بالکن‌ها به نیروگاه‌های کوچک خورشیدی تبدیل می‌شوند",
-    image: latestSixImage,
-  },
-];
-
-const marketItems = [
-  ["BTC", "$63,895.00", "1.97%"],
-  ["ETH", "$1,872.68", "2.60%"],
-  ["BNB", "$599.59", "1.47%"],
-  ["SOL", "$145.26", "2.40%"],
-];
 
 function SearchIcon() {
   return (
@@ -196,6 +41,14 @@ function MenuIcon() {
   return (
     <svg aria-hidden="true" className="size-7" fill="none" viewBox="0 0 24 24">
       <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg aria-hidden="true" className="size-7" fill="none" viewBox="0 0 24 24">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
     </svg>
   );
 }
@@ -220,7 +73,7 @@ function StoryLink({
   href?: string | null;
   block?: boolean;
   className?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   children: ReactNode;
 }) {
   const cls = `${block ? "block " : ""}no-underline text-inherit ${className}`.trim();
@@ -232,26 +85,10 @@ function StoryLink({
   );
 }
 
-function zipNews(posts: HomePost[], count: number, fallback: NewsItem[]): NewsItem[] {
-  return Array.from({ length: count }, (_, index) => {
-    const post = posts[index];
-    const base = fallback[index % fallback.length];
-    if (!post) return base;
-    return {
-      category: post.category || base.category,
-      title: post.title,
-      image: absoluteAsset(post.imageUrl) ?? base.image,
-      href: articleUrl(post.href),
-    };
-  });
-}
-
-function zipText(posts: HomePost[], count: number, fallback: { title: string; href: string | null }[]) {
-  return Array.from({ length: count }, (_, index) => {
-    const post = posts[index];
-    if (!post) return fallback[index % fallback.length];
-    return { title: post.title, href: articleUrl(post.href) };
-  });
+function PostImage({ post, className = "" }: { post: HomePost; className?: string }) {
+  const src = absoluteAsset(post.imageUrl);
+  if (!src) return <div className={`${className} bg-[#f4f5f6]`} aria-label={post.imageAlt} />;
+  return <img alt={post.imageAlt} className={`${className} object-cover`} src={src} />;
 }
 
 function SectionHeading({ children, dark = false }: { children: string; dark?: boolean }) {
@@ -263,111 +100,154 @@ function SectionHeading({ children, dark = false }: { children: string; dark?: b
   );
 }
 
-function NewsCard({ item }: { item: NewsItem }) {
+function MenuDropdown({ nav, onClose }: { nav: NavItem[]; onClose: () => void }) {
+  const links = nav.length ? nav : [];
   return (
-    <article className="group min-w-0 border-b border-[#cbced4] pb-5">
-      <StoryLink block href={item.href}>
-        <div className="aspect-video overflow-hidden rounded-[6px] bg-[#f4f5f6]">
-          <img alt={item.title} className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" src={item.image} />
-        </div>
-        <p className="mt-4 text-[14px] font-medium text-[#990108]">{item.category}</p>
-        <h3 className="mt-2 text-[18px] font-bold leading-[1.65] text-[#141618]">{item.title}</h3>
-      </StoryLink>
-    </article>
+    <div className="absolute inset-x-0 top-[88px] z-50 bg-white shadow-xl" dir="rtl">
+      <div className="grid grid-cols-2 gap-x-8 gap-y-1 px-7 py-6">
+        {links.map((item) => (
+          <a
+            className="border-b border-[#f0f1f3] py-2.5 text-[14px] font-bold text-[#141618] transition-colors hover:text-[#990108]"
+            href={item.href === "/" ? "/" : `${API_URL}${item.href}`}
+            key={item.label}
+            onClick={onClose}
+          >
+            {item.label}
+          </a>
+        ))}
+        <a
+          className="border-b border-[#f0f1f3] py-2.5 text-[14px] font-bold text-[#141618] transition-colors hover:text-[#990108]"
+          href="#videos"
+          onClick={onClose}
+        >
+          ویدیو
+        </a>
+        <a
+          className="border-b border-[#f0f1f3] py-2.5 text-[14px] font-bold text-[#141618] transition-colors hover:text-[#990108]"
+          href="#photos"
+          onClick={onClose}
+        >
+          عکس
+        </a>
+      </div>
+    </div>
   );
 }
 
 function DesktopHeader() {
-  const marketRows = useMarket() ?? marketItems;
+  const home = useHomeData();
+  const market = useMarket();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const nav: NavItem[] = home?.nav ?? [];
+  const navLinks = [
+    ...nav.slice(0, 4).map((item) => [item.label, item.href === "/" ? "/" : `${API_URL}${item.href}`] as const),
+    ["ویدیو", "#videos"] as const,
+    ["عکس", "#photos"] as const,
+  ];
   return (
-    <header>
+    <header className="relative">
       <div className="bg-[#c93035] text-white">
         <div className="mx-auto flex h-[88px] max-w-[1280px] items-center justify-between px-7">
           <button
             aria-label="منو"
             className="grid size-11 place-items-center"
-            onClick={() => {
-              window.location.href = `${API_URL}/admin`;
-            }}
+            onClick={() => setMenuOpen((v) => !v)}
             type="button"
           >
-            <MenuIcon />
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
-          <img alt="ECO TIMES" className="h-[76px] w-[102px] object-contain" src={footerLogo} />
+          <img alt="ECO TIMES" className="h-[80px] w-[107px] object-contain" src={logoImage} />
           <button aria-label="جستجو" className="grid size-11 place-items-center" type="button">
             <SearchIcon />
           </button>
         </div>
       </div>
+      {menuOpen && <MenuDropdown nav={nav} onClose={() => setMenuOpen(false)} />}
       <nav className="border-b border-[#cbced4] bg-white" aria-label="دسته‌بندی‌ها">
         <div className="mx-auto flex h-[52px] max-w-[1280px] items-center justify-center gap-10 px-7 text-[14px] font-bold text-[#141618]">
-          {[
-            ["اقتصاد دیجیتال", `${API_URL}/category/digital-economy`],
-            ["سلامت و درمان", `${API_URL}/category/health`],
-            ["هوش مصنوعی", `${API_URL}/category/ai`],
-            ["انرژی", `${API_URL}/category/energy`],
-            ["ویدئو", "#videos"],
-            ["عکس", "#photos"],
-          ].map(([label, href]) => (
+          {navLinks.map(([label, href]) => (
             <a className="transition-colors hover:text-[#990108]" href={href} key={label}>{label}</a>
           ))}
         </div>
       </nav>
-      <div className="overflow-hidden border-b border-[#cbced4] bg-[rgba(255,255,255,.95)]" dir="ltr">
-        <div className="mx-auto flex h-[48px] max-w-[1280px] items-center justify-between gap-8 px-7 font-['Arimo:Bold',sans-serif]">
-          {marketRows.map(([symbol, value, change]) => (
-            <div className="flex items-center gap-2 whitespace-nowrap" key={symbol}>
+      <TickerMarquee
+        className="mx-auto flex h-[48px] max-w-[1280px] items-center border-b border-[#cbced4] bg-[rgba(255,255,255,.95)] px-7 font-['Arimo:Bold',sans-serif]"
+        dataName="top-crypto-tickers"
+        gap={40}
+        speed={1.1}
+      >
+        {tickerSymbols.map((symbol, i) => {
+          const value = market?.[i]?.[1] ?? null;
+          const change = market?.[i]?.[2] ?? null;
+          const num = change ? Number.parseFloat(change) : NaN;
+          const hasChange = Number.isFinite(num);
+          const isUp = hasChange ? num >= 0 : null;
+          return (
+            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap" key={symbol}>
+              {coinImages[symbol] && (
+                <img
+                  alt=""
+                  className="size-[22px] shrink-0 rounded-[11px] border border-[#e2e6ef] bg-white object-cover"
+                  src={coinImages[symbol]}
+                />
+              )}
               <span className="text-[11px] tracking-[.85px] text-[#687086]">{symbol}</span>
-              <strong className="text-[13px] text-[#121728]">{value}</strong>
-              <span className="text-[11px] text-[#c93444]">▼ {change}</span>
+              <strong className="text-[13px] text-[#121728]">{value ?? "—"}</strong>
+              <span
+                className={`text-[11px] ${isUp === null ? "text-[#687086]" : isUp ? "text-[#087b55]" : "text-[#c93444]"}`}
+              >
+                {hasChange ? `${isUp ? "▲" : "▼"} ${Math.abs(num).toFixed(2)}%` : "—"}
+              </span>
             </div>
-          ))}
-          <span className="text-[11px] font-bold tracking-[.8px] text-[#687086]">CRYPTO MARKET</span>
-        </div>
-      </div>
+          );
+        })}
+      </TickerMarquee>
     </header>
+  );
+}
+
+function NewsCard({ post }: { post: HomePost }) {
+  return (
+    <article className="group min-w-0 border-b border-[#cbced4] pb-5">
+      <StoryLink block href={articleUrl(post.href)}>
+        <div className="aspect-video overflow-hidden rounded-[6px] bg-[#f4f5f6]">
+          <PostImage className="size-full transition-transform duration-300 group-hover:scale-[1.02]" post={post} />
+        </div>
+        <p className="mt-4 text-[14px] font-medium text-[#990108]">{post.category}</p>
+        <h3 className="mt-2 text-[18px] font-bold leading-[1.65] text-[#141618]">{post.title}</h3>
+      </StoryLink>
+    </article>
   );
 }
 
 function DesktopPage() {
   const home = useHomeData();
-  const leadStories = home ? zipNews(home.latest, 6, staticLeadStories) : staticLeadStories;
-  const latestStories = home ? zipNews(home.latest.slice(6), 6, staticLatestStories) : staticLatestStories;
-  const videoPool = home?.sections.videos ?? [];
-  const videoStories = home ? zipNews(videoPool.slice(1), 3, staticVideoStories) : staticVideoStories;
-  const asideVideo = videoPool[0] ?? null;
-  const digitalStories = home ? zipNews(home.sections["digital-economy"] ?? [], 3, staticDigitalStories) : staticDigitalStories;
-  const topSource = home?.sections["top-stories"]?.length ? home.sections["top-stories"] : home?.mostViewed ?? [];
-  const topStories = home ? zipText(topSource, 5, staticTopStories) : staticTopStories;
-  const magazinePosts = home?.sections.magazine ?? [];
+  const failed = useHomeFailed();
+  const section = (key: string): HomePost[] => home?.sections[key] ?? [];
+
+  if (!home && !failed) return <LoadingScreen />;
+
+  const heroPost = section("hero")[0] ?? null;
+  const allVideos = section("videos");
+  const heroVideo = allVideos[0] ?? null;
+  const videos = allVideos.slice(1, 5);
+  const topStories = section("top-stories");
+  const heroSideNews = section("hero-video");
+  const asideNews = topStories;
+  const latest = home?.latest ?? [];
+  const latestFirst = latest.slice(0, 6);
+  const featuredPosts = heroSideNews.length ? heroSideNews : latestFirst;
+  const magazinePosts = section("magazine");
   const magazineMain = magazinePosts[0] ?? null;
-  const resilienceStories = home
-    ? Array.from({ length: 4 }, (_, index) => {
-        const post = magazinePosts[index + 1];
-        return post
-          ? { title: post.title, description: post.lead, href: articleUrl(post.href) }
-          : staticResilienceStories[index % staticResilienceStories.length];
-      })
-    : staticResilienceStories;
-  const heroPost = home?.sections.hero?.[0] ?? null;
-  const galleryPhotos = home?.sections.photos ?? [];
-  const gallerySlots = [galleryOne, galleryTwo, galleryThree, galleryFour, galleryFive].map((fallback, index) => {
-    const post = galleryPhotos[index];
-    return {
-      image: absoluteAsset(post?.imageUrl) ?? fallback,
-      href: articleUrl(post?.href ?? null),
-      title: post?.title ?? null,
-    };
-  });
-  const [galleryOrder, setGalleryOrder] = useState([0, 1, 2, 3, 4]);
-  const bigSlot = gallerySlots[galleryOrder[0] % gallerySlots.length];
-  const galleryTitle = bigSlot.title ?? "گرامیداشت روز ملی صنعت و معدن با حضور رئیس جمهور";
-  const swapGallery = (index: number) =>
-    setGalleryOrder((order) => {
-      const next = [...order];
-      [next[0], next[index]] = [next[index], next[0]];
-      return next;
-    });
+  const magazineList = magazinePosts.slice(1, 5);
+  const digitalPosts = section("digital-economy");
+  const digitalMain = digitalPosts[0] ?? null;
+  const digitalList = digitalPosts.slice(1, 3);
+  const adOne = section("ad-1")[0] ?? null;
+  const adTwo = section("ad-2")[0] ?? null;
+  const galleryPhotos = section("photos");
+  const galleryBig = galleryPhotos[0] ?? null;
+  const galleryTiles = galleryPhotos.slice(1, 5);
 
   return (
     <div className="min-h-screen bg-white font-['IRANSansX',sans-serif] text-[#141618]" dir="rtl">
@@ -376,204 +256,269 @@ function DesktopPage() {
       <main>
         <section className="mx-auto grid max-w-[1280px] grid-cols-12 gap-7 px-7 py-9">
           <article className="col-span-8 overflow-hidden rounded-[6px] bg-[#f4f5f6]">
-            <StoryLink block href={articleUrl(heroPost?.href ?? null)}>
-              <img
-                alt={heroPost?.imageAlt ?? "قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران"}
-                className="aspect-[16/8.2] w-full object-cover"
-                src={absoluteAsset(heroPost?.imageUrl) ?? leadImage}
-              />
-              <div className="p-7">
-                <p className="text-[15px] font-medium text-[#990108]">{heroPost?.kicker ?? "معاون علمی رئیس جمهور:"}</p>
-                <h1 className="mt-3 text-[37px] font-bold leading-[1.35] tracking-[-1px]">
-                  {heroPost?.title ?? "قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران"}
-                </h1>
-                <p className="mt-4 max-w-[760px] text-[16px] font-medium leading-8 text-[#22252a]">
-                  {heroPost?.lead ??
-                    "حسین افشین، معاون علمی رئیس‌جمهور از تغییر رویکرد سیاست‌گذاری علم و فناوری کشور خبر داد و «قدرت‌بنیان» را پارادایم جدید حکمرانی فناوری ایران معرفی کرد"}
-                </p>
-              </div>
-            </StoryLink>
+            {heroPost && (
+              <StoryLink block href={articleUrl(heroPost.href)}>
+                <PostImage className="aspect-[16/8.2] w-full" post={heroPost} />
+                <div className="p-7">
+                  {heroPost.kicker && <p className="text-[15px] font-medium text-[#990108]">{heroPost.kicker}</p>}
+                  <h1 className="mt-3 text-[37px] font-bold leading-[1.35] tracking-[-1px]">{heroPost.title}</h1>
+                  {heroPost.lead && (
+                    <p className="mt-4 max-w-[760px] text-[16px] font-medium leading-8 text-[#22252a]">{heroPost.lead}</p>
+                  )}
+                </div>
+              </StoryLink>
+            )}
           </article>
 
           <aside className="col-span-4 flex flex-col">
-            <div className="relative overflow-hidden rounded-[6px] bg-[#000e2c]">
-              <StoryLink block href={articleUrl(asideVideo?.href ?? null)}>
-                <img alt={asideVideo?.imageAlt ?? "ویدئو"} className="aspect-video w-full object-cover" src={absoluteAsset(asideVideo?.imageUrl) ?? videoCover} />
-                <div className="absolute inset-0 grid place-items-center"><PlayIcon /></div>
-              </StoryLink>
-            </div>
-            <div className="mt-4 flex items-center justify-between border-b border-[#cbced4] pb-4">
-              <span className="rounded-[4px] bg-[#990108] px-3 py-1.5 text-[12px] text-white">● VIDEO</span>
-              <span className="text-[14px] font-bold">ویدئو</span>
-            </div>
-            <div className="mt-5 rounded-[6px] bg-[#f4f5f6] p-5">
-              <h2 className="border-b border-[#cbced4] pb-3 text-[21px] font-bold">اخبار برتر</h2>
-              <ol className="divide-y divide-[#cbced4]">
-                {topStories.slice(0, 5).map((story, index) => (
-                  <li className="flex gap-3 py-3.5" key={story.title}>
-                    <span className="font-['Arimo:Bold',sans-serif] text-[18px] font-bold text-[#c93035]">{index + 1}</span>
-                    <p className="text-[14px] font-bold leading-6">
-                      <StoryLink href={story.href}>{story.title}</StoryLink>
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            </div>
+            {heroVideo && (
+              <>
+                <StoryLink block href={articleUrl(heroVideo.href)}>
+                  <div className="relative overflow-hidden rounded-[6px] bg-[#000e2c]">
+                    {heroVideo.isUploadedVideo ? (
+                      <AutoPlayVideo className="aspect-video w-full" post={heroVideo} />
+                    ) : (
+                      <>
+                        <PostImage className="aspect-video w-full" post={heroVideo} />
+                        <div className="absolute inset-0 grid place-items-center"><PlayIcon /></div>
+                      </>
+                    )}
+                  </div>
+                </StoryLink>
+                <div className="mt-4 flex items-center justify-between border-b border-[#cbced4] pb-4">
+                  <span className="rounded-[4px] bg-[#990108] px-3 py-1.5 text-[12px] text-white">● VIDEO</span>
+                  <span className="text-[14px] font-bold">{heroVideo.category}</span>
+                </div>
+              </>
+            )}
+            {asideNews.length > 0 && (
+              <div className="mt-5 rounded-[6px] bg-[#f4f5f6] p-5">
+                <h2 className="border-b border-[#cbced4] pb-3 text-[21px] font-bold">اخبار برتر</h2>
+                <ol className="divide-y divide-[#cbced4]">
+                  {asideNews.slice(0, 6).map((story, index) => (
+                    <li className="flex gap-3 py-3.5" key={story.id}>
+                      <span className="font-['Arimo:Bold',sans-serif] text-[18px] font-bold text-[#c93035]">{index + 1}</span>
+                      <p className="text-[14px] font-bold leading-6">
+                        <StoryLink href={articleUrl(story.href)}>{story.title}</StoryLink>
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </aside>
         </section>
 
-        <section className="mx-auto max-w-[1280px] px-7 pb-12">
-          <SectionHeading>آخرین اخبار</SectionHeading>
-          <div className="grid grid-cols-3 gap-x-7 gap-y-8">
-            {leadStories.map((item) => <NewsCard item={item} key={item.title} />)}
-          </div>
-        </section>
-
-        <section className="bg-[#000e2c] py-12" id="videos">
-          <div className="mx-auto max-w-[1280px] px-7">
-            <SectionHeading dark>ویدئو</SectionHeading>
-            <div className="grid grid-cols-3 gap-7">
-              {videoStories.map((item) => (
-                <article className="group" key={item.title}>
-                  <StoryLink block href={item.href}>
-                    <div className="relative aspect-video overflow-hidden rounded-[6px]">
-                      <img alt={item.title} className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" src={item.image} />
-                      <div className="absolute inset-0 grid place-items-center"><PlayIcon small /></div>
-                    </div>
-                    <p className="mt-4 text-[14px] font-medium text-[#cbced4]">{item.category}</p>
-                    <h3 className="mt-2 text-[18px] font-bold leading-8 text-white">{item.title}</h3>
-                  </StoryLink>
-                </article>
-              ))}
+        {featuredPosts.length > 0 && (
+          <section className="mx-auto max-w-[1280px] px-7 pb-12">
+            <SectionHeading>برگزیده</SectionHeading>
+            <div className="grid grid-cols-3 gap-x-7 gap-y-8">
+              {featuredPosts.map((post) => <NewsCard post={post} key={post.id} />)}
             </div>
-            <p className="mt-8 border-t border-[#515662] pt-4 text-left text-[13px] text-[#cbced4]" dir="ltr">
-              {videoPool.length ? `${videoPool.length} Videos` : "11 Videos"}
-            </p>
-          </div>
-        </section>
+          </section>
+        )}
 
-        <section className="border-b border-[#e4e4e7] bg-white py-14">
-          <div className="mx-auto max-w-[1280px] px-7">
-            <div className="grid grid-cols-12 gap-12 bg-[#f8f6f1] p-10">
-              <div className="col-span-4 flex justify-center">
-                <StoryLink block href={articleUrl(magazineMain?.href ?? null)}>
-                  <img
-                    alt={magazineMain?.imageAlt ?? "تاب آوری"}
-                    className="h-[560px] w-[374px] object-cover shadow-[0_25px_50px_-12px_rgba(0,0,0,.35)]"
-                    src={absoluteAsset(magazineMain?.imageUrl) ?? magazineCover}
-                  />
+        {videos.length > 0 && (
+          <section className="bg-[#000e2c] py-12" id="videos">
+            <div className="mx-auto max-w-[1280px] px-7">
+              <SectionHeading dark>ویدیو</SectionHeading>
+              <div className="grid grid-cols-3 gap-7">
+                {videos.map((post) => (
+                  <article className="group" key={post.id}>
+                    <StoryLink block href={articleUrl(post.href)}>
+                      <div className="relative aspect-video overflow-hidden rounded-[6px]">
+                        {post.isUploadedVideo ? (
+                          <AutoPlayVideo className="absolute inset-0" post={post} />
+                        ) : (
+                          <>
+                            <PostImage className="size-full transition-transform duration-300 group-hover:scale-[1.02]" post={post} />
+                            <div className="absolute inset-0 grid place-items-center"><PlayIcon small /></div>
+                          </>
+                        )}
+                      </div>
+                      <p className="mt-4 text-[14px] font-medium text-[#cbced4]">{post.category}</p>
+                      <h3 className="mt-2 text-[18px] font-bold leading-8 text-white">{post.title}</h3>
+                    </StoryLink>
+                  </article>
+                ))}
+              </div>
+              <p className="mt-8 border-t border-[#515662] pt-4 text-left text-[13px] text-[#cbced4]" dir="ltr">
+                {allVideos.length} Videos
+              </p>
+            </div>
+          </section>
+        )}
+
+        {magazineMain && (
+          <section className="border-b border-[#e4e4e7] bg-white py-14">
+            <div className="mx-auto max-w-[1280px] px-7">
+              <div className="grid grid-cols-12 gap-12 bg-[#f8f6f1] p-10">
+                <div className="col-span-4 flex justify-center">
+                  <StoryLink block href={articleUrl(magazineMain.href)}>
+                    <div className="h-[560px] w-[374px] overflow-hidden bg-[#f4f5f6] shadow-[0_25px_50px_-12px_rgba(0,0,0,.35)]">
+                      <PostImage className="size-full" post={magazineMain} />
+                    </div>
+                  </StoryLink>
+                </div>
+                <div className="col-span-8 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 text-[12px] font-bold tracking-[1.98px] text-[#71717b]" dir="ltr">
+                    <span>MONTHLY EDITION</span><span>|</span><span className="text-[#27272a]">AUGUST 2026</span>
+                  </div>
+                  <h2 className="mt-5 text-[38px] font-black text-[#09090b]">{magazineMain.title}</h2>
+                  {magazineMain.lead && <p className="mt-3 text-[15px] leading-8 text-[#52525c]">{magazineMain.lead}</p>}
+                  {magazineList.length > 0 && (
+                    <div className="mt-5 grid grid-cols-2 gap-x-8">
+                      {magazineList.map((story) => (
+                        <article className="border-t border-[#e3dfd6] py-5" key={story.id}>
+                          <StoryLink block href={articleUrl(story.href)}>
+                            <h3 className="text-[17px] font-bold leading-7 text-[#09090b]">{story.title}</h3>
+                            {story.lead && <p className="mt-2 text-[14px] leading-7 text-[#52525c]">{story.lead}</p>}
+                          </StoryLink>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-5 flex items-center gap-3 text-[14px] font-bold">
+                    <StoryLink href={`${API_URL}/category/magazine`}>بیشتر بخوانید</StoryLink>
+                    <span className="grid size-8 place-items-center rounded-full bg-[#09090b] text-white">←</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {digitalMain && (
+          <section className="mx-auto max-w-[1280px] px-7 py-14">
+            <SectionHeading>اقتصاد دیجیتال</SectionHeading>
+            <div className="grid grid-cols-12 gap-7">
+              <article className="col-span-7">
+                <StoryLink block href={articleUrl(digitalMain.href)}>
+                  <div className="aspect-video overflow-hidden rounded-[6px] bg-[#f4f5f6]">
+                    <PostImage className="size-full" post={digitalMain} />
+                  </div>
+                  <p className="mt-4 text-[14px] font-medium text-[#990108]">{digitalMain.category}</p>
+                  <h3 className="mt-2 text-[21px] font-bold leading-9">{digitalMain.title}</h3>
                 </StoryLink>
-              </div>
-              <div className="col-span-8 flex flex-col justify-center">
-                <div className="flex items-center gap-3 text-[12px] font-bold tracking-[1.98px] text-[#71717b]" dir="ltr">
-                  <span>MONTHLY EDITION</span><span>|</span><span className="text-[#27272a]">AUGUST 2026</span>
-                </div>
-                <h2 className="mt-5 text-[38px] font-black text-[#09090b]">{magazineMain?.title ?? "تاب آوری"}</h2>
-                <div className="mt-5 grid grid-cols-2 gap-x-8">
-                  {resilienceStories.map((story) => (
-                    <article className="border-t border-[#e3dfd6] py-5" key={story.title}>
-                      <StoryLink block href={story.href}>
-                        <h3 className="text-[17px] font-bold leading-7 text-[#09090b]">{story.title}</h3>
-                        <p className="mt-2 text-[14px] leading-7 text-[#52525c]">{story.description}</p>
-                      </StoryLink>
-                    </article>
-                  ))}
-                </div>
-                <div className="mt-5 flex items-center gap-3 text-[14px] font-bold">
-                  <span>بیشتر بخوانید</span><span className="grid size-8 place-items-center rounded-full bg-[#09090b] text-white">←</span>
-                </div>
+              </article>
+              <div className="col-span-5 divide-y divide-[#cbced4] border-y border-[#cbced4]">
+                {digitalList.map((story) => (
+                  <article className="group grid grid-cols-[1fr_180px] gap-5 py-6" key={story.id}>
+                    <StoryLink href={articleUrl(story.href)} className="contents">
+                      <div>
+                        <p className="text-[14px] font-medium text-[#990108]">{story.category}</p>
+                        <h3 className="mt-2 text-[18px] font-bold leading-8">{story.title}</h3>
+                      </div>
+                      <div className="aspect-video w-[180px] overflow-hidden rounded-[6px] bg-[#f4f5f6]">
+                        <PostImage className="size-full" post={story} />
+                      </div>
+                    </StoryLink>
+                  </article>
+                ))}
+                {digitalMain && (
+                  <div className="py-5 text-[14px] font-bold">
+                    <StoryLink href={articleUrl(digitalMain.href)}>بیشتر بخوانید ←</StoryLink>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-[1280px] px-7 py-14">
-          <SectionHeading>اقتصاد دیجیتال</SectionHeading>
-          <div className="grid grid-cols-12 gap-7">
-            <article className="col-span-7">
-              <StoryLink block href={digitalStories[0].href}>
-                <img alt={digitalStories[0].category} className="aspect-video w-full rounded-[6px] object-cover" src={digitalStories[0].image} />
-                <p className="mt-4 text-[14px] font-medium text-[#990108]">{digitalStories[0].category}</p>
-                <h3 className="mt-2 text-[21px] font-bold leading-9">{digitalStories[0].title}</h3>
-              </StoryLink>
-            </article>
-            <div className="col-span-5 divide-y divide-[#cbced4] border-y border-[#cbced4]">
-              {digitalStories.slice(1).map((story) => (
-                <article className="grid grid-cols-[1fr_180px] gap-5 py-6" key={story.title}>
-                  <StoryLink href={story.href} className="contents">
-                    <div>
-                      <p className="text-[14px] font-medium text-[#990108]">{story.category}</p>
-                      <h3 className="mt-2 text-[18px] font-bold leading-8">{story.title}</h3>
-                    </div>
-                    <img alt={story.title} className="aspect-video w-[180px] rounded-[6px] object-cover" src={story.image} />
-                  </StoryLink>
-                </article>
-              ))}
-              <div className="py-5 text-[14px] font-bold">بیشتر بخوانید ←</div>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <aside className="mx-auto max-w-[1280px] px-7 pb-14">
           <div className="overflow-hidden rounded-[6px] bg-[#000e2c] p-4">
             <p className="mb-3 text-left font-['Inknut_Antiqua:Bold',serif] text-[13px] text-white" dir="ltr">ADVERTISE</p>
-            <img alt="ADVERTISE" className="h-[210px] w-full object-cover" src={advertiseImage} />
+            <StoryLink block href={articleUrl(adOne?.href ?? null)}>
+              {adOne && absoluteAsset(adOne.imageUrl) ? (
+                <PostImage className="h-[210px] w-full" post={adOne} />
+              ) : (
+                <img alt="ADVERTISE" className="h-[210px] w-full object-cover" src={advertiseImage} />
+              )}
+            </StoryLink>
           </div>
         </aside>
 
-        <section className="bg-[#f4f5f6] py-14">
-          <div className="mx-auto max-w-[1280px] px-7">
-            <SectionHeading>آخرین اخبار</SectionHeading>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-0">
-              {latestStories.map((item) => (
-                <article className="min-h-[138px] border-b border-[#cbced4] py-5" key={item.title}>
-                  <StoryLink href={item.href} className="flex h-full min-h-[98px] items-center gap-5">
-                    <img alt={item.title} className="size-[112px] shrink-0 rounded-[6px] object-cover" src={item.image} />
-                    <div>
-                      <p className="text-[14px] font-medium text-[#990108]">{item.category}</p>
-                      <h3 className="mt-2 text-[17px] font-bold leading-8">{item.title}</h3>
-                    </div>
-                  </StoryLink>
-                </article>
-              ))}
-            </div>
-            <button className="mt-8 h-11 w-full rounded-[6px] bg-[#656c7a] text-[14px] font-bold text-[#f4f5f6]" type="button">بیشتر بخوانید</button>
-          </div>
-        </section>
-
         <section className="bg-[#000e2c] text-white">
           <div className="mx-auto grid max-w-[1280px] grid-cols-2 items-center gap-10 px-7 py-10">
-            <img alt="صرافی والکس" className="aspect-video w-full rounded-[6px] object-cover" src={wallexImage} />
+            <StoryLink block href={articleUrl(adTwo?.href ?? null)}>
+              {adTwo && absoluteAsset(adTwo.imageUrl) ? (
+                <PostImage className="aspect-video w-full rounded-[6px]" post={adTwo} />
+              ) : (
+                <img alt="صرافی والکس" className="aspect-video w-full rounded-[6px] object-cover" src={wallexImage} />
+              )}
+            </StoryLink>
             <div className="text-center">
-              <h2 className="text-[23px] font-bold leading-10">صرافی والکس معتبرترین و پیشرفته ترین پلتفرم معامله ارزهای دیجیتال ایران با پشتیبانی ۲۴/۷ و امکانات رایگان، در دنیای آینده قدم بزن!</h2>
-              <p className="mt-5 text-[14px] leading-7 text-[#cbced4]" dir="ltr">Wallex Exchange, Iran’s most trusted and advanced cryptocurrency trading platform, offering 24/7 support and free features. Step into the future of digital finance!</p>
+              {adTwo ? (
+                <>
+                  <h2 className="text-[23px] font-bold leading-10">{adTwo.title}</h2>
+                  {adTwo.lead && <p className="mt-5 text-[14px] leading-7 text-[#cbced4]">{adTwo.lead}</p>}
+                </>
+              ) : (
+                <>
+                  <h2 className="text-[23px] font-bold leading-10">صرافی والکس معتبرترین و پیشرفته ترین پلتفرم معامله ارزهای دیجیتال ایران با پشتیبانی ۲۴/۷ و امکانات رایگان، در دنیای آینده قدم بزن!</h2>
+                  <p className="mt-5 text-[14px] leading-7 text-[#cbced4]" dir="ltr">Wallex Exchange, Iran’s most trusted and advanced cryptocurrency trading platform, offering 24/7 support and free features. Step into the future of digital finance!</p>
+                </>
+              )}
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-[1280px] px-7 py-14" id="photos">
-          <SectionHeading>عکس</SectionHeading>
-          <h3 className="mb-6 text-[24px] font-bold">{galleryTitle}</h3>
-          <div className="grid grid-cols-12 grid-rows-2 gap-3">
-            <StoryLink href={bigSlot.href} className="contents">
-              <img alt={galleryTitle} className="col-span-6 row-span-2 h-[520px] w-full rounded-[6px] object-cover" src={bigSlot.image} />
-            </StoryLink>
-            {galleryOrder.slice(1).map((slotIndex) => {
-              const slot = gallerySlots[slotIndex];
-              return (
-                <StoryLink className="contents cursor-pointer" key={slotIndex} onClick={() => swapGallery(slotIndex)}>
-                  <img alt={slot.title ?? galleryTitle} className="col-span-3 h-[254px] w-full rounded-[6px] object-cover" src={slot.image} />
+        {latestFirst.length > 0 && (
+          <section className="bg-[#f4f5f6] py-14">
+            <div className="mx-auto max-w-[1280px] px-7">
+              <SectionHeading>آخرین اخبار</SectionHeading>
+              <div className="grid grid-cols-2 gap-x-12 gap-y-0">
+                {latestFirst.map((post) => (
+                  <article className="group flex min-h-[138px] items-center gap-5 border-b border-[#cbced4] py-5" key={post.id}>
+                    <StoryLink href={articleUrl(post.href)} className="contents">
+                      <div className="size-[112px] shrink-0 overflow-hidden rounded-[6px] bg-[#f4f5f6]">
+                        <PostImage className="size-full transition-transform duration-300 group-hover:scale-[1.02]" post={post} />
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-medium text-[#990108]">{post.category}</p>
+                        <h3 className="mt-2 text-[17px] font-bold leading-8">{post.title}</h3>
+                      </div>
+                    </StoryLink>
+                  </article>
+                ))}
+              </div>
+              <button className="mt-8 h-11 w-full rounded-[6px] bg-[#656c7a] text-[14px] font-bold text-[#f4f5f6]" type="button">
+                بیشتر بخوانید
+              </button>
+            </div>
+          </section>
+        )}
+
+        {galleryPhotos.length > 0 && (
+          <section className="mx-auto max-w-[1280px] px-7 py-14" id="photos">
+            <SectionHeading>عکس</SectionHeading>
+            <h3 className="mb-6 text-[24px] font-bold">{galleryBig?.title ?? ""}</h3>
+            <div className="grid grid-cols-12 grid-rows-2 gap-3">
+              <StoryLink href={articleUrl(galleryBig?.href ?? null)} className="contents">
+                {galleryBig && absoluteAsset(galleryBig.imageUrl) ? (
+                  <PostImage className="col-span-6 row-span-2 h-[520px] w-full rounded-[6px]" post={galleryBig} />
+                ) : (
+                  <div className="col-span-6 row-span-2 h-[520px] w-full rounded-[6px] bg-[#f4f5f6]" />
+                )}
+              </StoryLink>
+              {galleryTiles.map((post) => (
+                <StoryLink href={articleUrl(post.href)} className="contents" key={post.id}>
+                  {absoluteAsset(post.imageUrl) ? (
+                    <PostImage className="col-span-3 h-[254px] w-full rounded-[6px]" post={post} />
+                  ) : (
+                    <div className="col-span-3 h-[254px] w-full rounded-[6px] bg-[#f4f5f6]" />
+                  )}
                 </StoryLink>
-              );
-            })}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="bg-[#000e2c] text-white">
         <div className="mx-auto max-w-[1280px] px-7 py-12">
           <div className="flex items-start justify-between border-b border-[#969ca8] pb-10">
-            <img alt="ECO TIMES" className="h-[86px] w-[140px] object-contain" src={footerLogo} />
+            <img alt="ECO TIMES" className="h-[86px] w-[140px] object-contain" src={`${API_URL}/ecotimes-logo-white.png`} />
             <div className="flex gap-20 text-[14px] font-bold">
               <a href="#">درباره ما</a><a href="#">ارتباط با ما</a><a href="#">پیوند ها</a>
             </div>

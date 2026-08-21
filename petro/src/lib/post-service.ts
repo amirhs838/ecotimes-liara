@@ -34,11 +34,14 @@ export async function validatePostPayload(
 
   const input = parsed.data;
 
-  const category = await db.category.findUnique({
-    where: { id: input.categoryId },
+  const categoryIds = [...new Set([input.categoryId, ...input.categoryIds])];
+  const categories = await db.category.findMany({
+    where: { id: { in: categoryIds } },
     select: { id: true },
   });
-  if (!category) return { response: badRequest("دسته‌بندی نامعتبر است") };
+  if (categories.length !== categoryIds.length) {
+    return { response: badRequest("دسته‌بندی نامعتبر است") };
+  }
 
   const imageIds = [
     input.homeImageId,

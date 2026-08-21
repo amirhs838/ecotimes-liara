@@ -23,12 +23,12 @@ export default async function PanelLayout({
               alt="اکوتایمز"
               className="h-7 w-auto"
             />
-            <span className="hidden sm:inline-block text-[10px] uppercase tracking-[0.25em] text-zinc-500 border-r border-zinc-800 pr-3 mr-1">
+            <span className="hidden sm:inline-block text-[10px] uppercase tracking-[0.25em] text-white/70 border-r border-white/20 pr-3 mr-1">
               پنل مدیریت محتوا
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-zinc-400" dir="ltr">
+            <span className="text-xs text-white/75" dir="ltr">
               {session.email}
             </span>
           </div>

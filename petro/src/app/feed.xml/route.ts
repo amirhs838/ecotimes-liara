@@ -12,17 +12,25 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  const posts = await db.post.findMany({
-    where: {
-      status: "PUBLISHED",
-      publishedAt: { lte: new Date() },
-      hasOwnPage: true,
-    },
-    orderBy: { publishedAt: "desc" },
-    take: 50,
-    include: { category: true },
-  });
+  let posts: Awaited<ReturnType<typeof db.post.findMany>> = [];
+  try {
+    posts = await db.post.findMany({
+      where: {
+        status: "PUBLISHED",
+        publishedAt: { lte: new Date() },
+        hasOwnPage: true,
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 50,
+      include: { category: true },
+    });
+  } catch {
+    // Build-time without DB (Liara) — return empty feed instead of failing build
+    posts = [];
+  }
 
   const items = posts
     .map((p) => {

@@ -1,0 +1,9 @@
+{
+  "app": "ecotimes",
+  "platform": "docker",
+  "port": 3000,
+  "build": {
+    "location": "iran",
+    "cache": true
+  }
+}

@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   if (isErrorResponse(guard)) return guard.response;
 
   const sections = await db.homeSection.findMany({
-    orderBy: { id: "asc" },
+    orderBy: [{ order: "asc" }, { id: "asc" }],
     include: {
       placements: {
         orderBy: { position: "asc" },

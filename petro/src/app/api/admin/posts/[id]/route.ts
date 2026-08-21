@@ -17,6 +17,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 const fullInclude = {
   category: true,
+  postCategories: true,
   tags: { include: { tag: true } },
   homeImage: true,
   innerImage: true,
@@ -96,6 +97,10 @@ export async function PUT(req: Request, { params }: Ctx) {
         tags: {
           deleteMany: {},
           create: tagIds.map((tagId) => ({ tagId })),
+        },
+        postCategories: {
+          deleteMany: {},
+          create: input.categoryIds.map((categoryId) => ({ categoryId })),
         },
       },
     });

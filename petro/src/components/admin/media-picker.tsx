@@ -8,7 +8,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { uploadMediaFile, type UploadedMedia } from "@/lib/upload-client";
-import { ImagePlus, Loader2, X, Film } from "lucide-react";
+import ImageCropDialog from "@/components/admin/image-crop-dialog";
+import { ImagePlus, Loader2, X, Film, Scissors } from "lucide-react";
 
 interface MediaPickerProps {
   kind: "image" | "video";
@@ -30,7 +31,9 @@ export default function MediaPicker({
   const [items, setItems] = useState<UploadedMedia[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -48,15 +51,19 @@ export default function MediaPicker({
     e.target.value = "";
     if (!file) return;
     setUploading(true);
+    setProgress(null);
     setError(null);
     try {
-      const media = await uploadMediaFile(file);
+      const media = await uploadMediaFile(file, "", (done, total) =>
+        setProgress({ done, total })
+      );
       onSelect(media);
       setOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "آپلود ناموفق بود");
     } finally {
       setUploading(false);
+      setProgress(null);
     }
   }
 
@@ -80,6 +87,17 @@ export default function MediaPicker({
             </div>
           )}
           <div className="absolute top-2 left-2 flex gap-1">
+            {kind === "image" && (
+              <button
+                type="button"
+                onClick={() => setCropOpen(true)}
+                className="text-[11px] bg-blue-600/90 hover:bg-blue-600 text-white rounded px-2 py-1 inline-flex items-center gap-1"
+                title="برش حرفه‌ای تصویر"
+              >
+                <Scissors className="w-3 h-3" />
+                برش
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setOpen(true)}
@@ -154,10 +172,12 @@ export default function MediaPicker({
                 {uploading ? (
                   <span className="inline-flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    در حال آپلود...
+                    {progress
+                      ? `در حال آپلود... ${Math.round((progress.done / progress.total) * 100)}٪`
+                      : "در حال آماده‌سازی..."}
                   </span>
                 ) : kind === "image" ? (
-                  "انتخاب تصویر (jpg / png / webp — حداکثر ۵ مگابایت)"
+                  "انتخاب تصویر (jpg / png / webp — حداکثر ۲۵ مگابایت)"
                 ) : (
                   "انتخاب ویدیو (mp4 / webm — حداکثر ۱۰۰ مگابایت)"
                 )}
@@ -217,6 +237,16 @@ export default function MediaPicker({
           )}
         </DialogContent>
       </Dialog>
+
+      <ImageCropDialog
+        open={cropOpen}
+        media={value!}
+        onClose={() => setCropOpen(false)}
+        onDone={(m) => {
+          onSelect(m);
+          setCropOpen(false);
+        }}
+      />
     </div>
   );
 }

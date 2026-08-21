@@ -69,8 +69,43 @@ const publishedWhere = () => ({
   publishedAt: { lte: new Date() },
 });
 
+/**
+ * Video slots ("videos" on the homepage, "category-video" on category pages)
+ * prefer MANUAL placements: whatever the editors put in these sections shows
+ * first. Only when a section has no placements does it fall back to the
+ * newest PUBLISHED posts that carry a video, so the box is never empty.
+ */
+const AUTO_VIDEO_SECTIONS = new Set(["videos", "category-video"]);
+
+/** Latest posts that have a video attached, newest first. */
+export async function getLatestVideoPosts(limit = 5): Promise<HomePost[]> {
+  const posts = await db.post.findMany({
+    where: { ...publishedWhere(), videoUrl: { not: null } },
+    orderBy: { publishedAt: "desc" },
+    take: limit,
+    include: postInclude,
+  });
+  return posts.map(toHomePost);
+}
+
 /** Posts placed in a homepage section, ordered by their position. */
 export async function getHomeSectionPosts(key: string): Promise<HomePost[]> {
+  if (AUTO_VIDEO_SECTIONS.has(key)) {
+    const section = await db.homeSection.findUnique({
+      where: { key },
+      select: { id: true, capacity: true },
+    });
+    if (section) {
+      const manual = await db.sectionPlacement.findMany({
+        where: { sectionId: section.id, post: publishedWhere() },
+        orderBy: { position: "asc" },
+        include: { post: { include: postInclude } },
+      });
+      if (manual.length > 0) return manual.map((pl) => toHomePost(pl.post));
+    }
+    // fallback: automatic, newest posts carrying a video
+    return getLatestVideoPosts(section?.capacity ?? 5);
+  }
   const placements = await db.sectionPlacement.findMany({
     where: {
       section: { key },
@@ -124,4 +159,16 @@ export async function getNavCategories(): Promise<NavItem[]> {
 /** Live stream settings (singleton). Null when never configured. */
 export async function getLiveStream() {
   return db.liveStream.findFirst();
+}
+
+/** Section display metadata (name + capacity) keyed by section key. */
+export async function getHomeSectionMeta(): Promise<
+  Record<string, { name: string; capacity: number }>
+> {
+  const sections = await db.homeSection.findMany({
+    orderBy: [{ order: "asc" }, { id: "asc" }],
+  });
+  return Object.fromEntries(
+    sections.map((s) => [s.key, { name: s.name, capacity: s.capacity }])
+  );
 }

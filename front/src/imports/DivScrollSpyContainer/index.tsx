@@ -4,9 +4,9 @@ import imgTimthumbPhp1 from "./ba64993282e1849c68688dc61507ba8d638efc1d.png";
 import imgTimthumbPhp2 from "./ea96dd87c4daee1c1c7de083c6be3f74487bd602.png";
 import imgTimthumbPhp3 from "./072c287437aa52016c1b5a6470ea0a9c665e68b3.png";
 import imgTimthumbPhp4 from "./13fc82c7bdbbc2e1b4ebef690ef9ba20e913a018.png";
-import imgImg202608021541085852 from "./158bf1cab03f1495a9b1ca5a10f432939945fb9e.png";
+import imgTimthumbPhp5 from "./coin-5.png";
+import imgTimthumbPhp6 from "./coin-6.png";
 import imgRectangle1 from "./1f369ec9c752c5ebe514f523bde92d9cca2d8186.png";
-import imgAbcNewsLiveAbcMl2502101739199021469HpMain16X9Jpg from "./f8777075d745ade55fd1f492bd874dac2385208e.png";
 import imgChatGptImageAug62026011630Pm1 from "./f0bc7b6eb0394faadd792ee110aef1c4d491a399.png";
 import imgModernaHqApJt2608041785874475703HpMain16X9Jpg from "./47a2a67f4f2837b8636b645b748e016e996b8314.png";
 import imgCyclosporiasisGtyGmh2608031785774719590HpMain16X9Jpg from "./5a079c71bdc9cc31fa323f7aa572956db3f22727.png";
@@ -37,9 +37,23 @@ import imgFire5GtyGmh2608051785938142332HpEmbedSl16X9TJpg from "./b37d429ee7d837
 import imgFire1ApGmh2608051785938141462HpEmbedSl16X9TJpg from "./701a8229b01625d046449a82f68b657c4e48a84f.png";
 import imgFire3GtyGmh2608051785938142778HpEmbedSl16X9TJpg from "./723884ecb125e94828d6870c0c6de46d2dbd6a7a.png";
 import imgAbcnLogo from "./5ebe0a821e4b54a4e643c895ba1be6a544f83528.png";
+import imgLogo from "./logo.png";
 import { imgIFaLight, imgIFaLight1, imgRectangle } from "./svg-4phsu";
-import { API_URL, articleUrl } from "@/lib/api";
-import { useMobileHome } from "@/lib/use-home-data";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { API_URL, absoluteAsset, articleUrl, type NavItem } from "@/lib/api";
+import { useHomeData, useMarket, useMobileHome } from "@/lib/use-home-data";
+import TickerMarquee from "@/TickerMarquee";
+import AutoPlayVideo from "@/AutoPlayVideo";
+
+const MobileGalleryContext = createContext<{
+  index: number;
+  total: number;
+  setIndex: (delta: number) => void;
+}>({
+  index: 0,
+  total: 1,
+  setIndex: () => {},
+});
 
 function TimthumbPhp() {
   return (
@@ -55,21 +69,67 @@ function TimthumbPhp() {
   );
 }
 
-function SpanSignalDeskTickerSymbol() {
+function Change({
+  boxClass,
+  dataName,
+  fallback,
+  fallbackUp,
+  idx,
+}: {
+  boxClass: string;
+  dataName: string;
+  fallback: string;
+  fallbackUp: boolean;
+  idx: number;
+}) {
+  const m = useMarket();
+  const raw = m?.[idx]?.[2];
+  if (!m || !raw) {
+    return (
+      <div className={boxClass} data-name={dataName}>
+        <div className="[word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#687086] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
+          <p className="leading-[11.2px]">—</p>
+        </div>
+      </div>
+    );
+  }
+  const num = raw ? parseFloat(raw) : NaN;
+  const isUp = Number.isFinite(num) ? num >= 0 : fallbackUp;
+  const text = Number.isFinite(num) ? `${Math.abs(num).toFixed(2)}%` : fallback;
+  const icon = isUp ? imgIFaLight1 : imgIFaLight;
   return (
-    <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="span.signal-desk-ticker__symbol">
-      <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
-        <p className="leading-[10.72px]">BTC</p>
+    <div className={boxClass} data-name={dataName}>
+      <div className="-translate-y-1/2 absolute left-0 size-[8.06px] top-[calc(50%-0.01px)]" data-name="i.fa-light:mask-group">
+        <div
+          className={`-translate-y-1/2 absolute ${isUp ? "bg-[#087b55]" : "bg-[#c93444]"} left-0 mask-alpha mask-intersect mask-no-clip mask-no-repeat mask-size-[8.06px_8.06px] size-[8.06px] top-1/2`}
+          style={{ maskImage: `url("${icon}")` }}
+          data-name="i.fa-light"
+        />
+      </div>
+      <div className={`-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] ${isUp ? "text-[#087b55]" : "text-[#c93444]"} text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap`}>
+        <p className="leading-[11.2px]">{text}</p>
       </div>
     </div>
   );
 }
 
-function Strong() {
+function SpanSignalDeskTickerSymbol({ idx = 0, fallback = "BTC" }: { idx?: number; fallback?: string }) {
+  const m = useMarket();
+  return (
+    <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="span.signal-desk-ticker__symbol">
+      <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
+        <p className="leading-[10.72px]">{m?.[idx]?.[0] ?? fallback}</p>
+      </div>
+    </div>
+  );
+}
+
+function Strong({ idx = 0 }: { idx?: number }) {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="strong">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#121728] text-[13.1px] whitespace-nowrap">
-        <p className="leading-[13.12px]">$63,895.00</p>
+        <p className="leading-[13.12px]">{m?.[idx]?.[1] ?? "—"}</p>
       </div>
     </div>
   );
@@ -84,14 +144,7 @@ function IFaLightMaskGroup() {
 }
 
 function Down3() {
-  return (
-    <div className="h-[11.2px] relative shrink-0 w-[42.98px]" data-name="Down 1.97%">
-      <IFaLightMaskGroup />
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#c93444] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
-        <p className="leading-[11.2px]">1.97%</p>
-      </div>
-    </div>
-  );
+  return <Change boxClass="h-[11.2px] relative shrink-0 w-[42.98px]" dataName="Down 1.97%" fallback="1.97%" fallbackUp={false} idx={0} />;
 }
 
 function ASignalDeskTicker() {
@@ -120,20 +173,22 @@ function TimthumbPhp1() {
 }
 
 function SpanSignalDeskTickerSymbol1() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="span.signal-desk-ticker__symbol">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
-        <p className="leading-[10.72px]">ETH</p>
+        <p className="leading-[10.72px]">{m?.[1]?.[0] ?? "ETH"}</p>
       </div>
     </div>
   );
 }
 
 function Strong1() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="strong">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#121728] text-[13.1px] whitespace-nowrap">
-        <p className="leading-[13.12px]">$1,872.68</p>
+        <p className="leading-[13.12px]">{m?.[1]?.[1] ?? "—"}</p>
       </div>
     </div>
   );
@@ -148,14 +203,7 @@ function IFaLightMaskGroup1() {
 }
 
 function Down5() {
-  return (
-    <div className="h-[11.2px] relative shrink-0 w-[42.98px]" data-name="Down 2.60%">
-      <IFaLightMaskGroup1 />
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#c93444] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
-        <p className="leading-[11.2px]">2.60%</p>
-      </div>
-    </div>
-  );
+  return <Change boxClass="h-[11.2px] relative shrink-0 w-[42.98px]" dataName="Down 2.60%" fallback="2.60%" fallbackUp={false} idx={1} />;
 }
 
 function ASignalDeskTicker1() {
@@ -184,20 +232,22 @@ function TimthumbPhp2() {
 }
 
 function SpanSignalDeskTickerSymbol2() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="span.signal-desk-ticker__symbol">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
-        <p className="leading-[10.72px]">BNB</p>
+        <p className="leading-[10.72px]">{m?.[2]?.[0] ?? "BNB"}</p>
       </div>
     </div>
   );
 }
 
 function Strong2() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="strong">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#121728] text-[13.1px] whitespace-nowrap">
-        <p className="leading-[13.12px]">$599.59</p>
+        <p className="leading-[13.12px]">{m?.[2]?.[1] ?? "—"}</p>
       </div>
     </div>
   );
@@ -212,14 +262,7 @@ function IFaLightMaskGroup2() {
 }
 
 function Down() {
-  return (
-    <div className="h-[11.2px] relative shrink-0 w-[42.98px]" data-name="Down 1.47%">
-      <IFaLightMaskGroup2 />
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#c93444] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
-        <p className="leading-[11.2px]">1.47%</p>
-      </div>
-    </div>
-  );
+  return <Change boxClass="h-[11.2px] relative shrink-0 w-[42.98px]" dataName="Down 1.47%" fallback="1.47%" fallbackUp={false} idx={2} />;
 }
 
 function ASignalDeskTicker2() {
@@ -248,20 +291,22 @@ function TimthumbPhp3() {
 }
 
 function SpanSignalDeskTickerSymbol3() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="span.signal-desk-ticker__symbol">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
-        <p className="leading-[10.72px]">XRP</p>
+        <p className="leading-[10.72px]">{m?.[3]?.[0] ?? "XRP"}</p>
       </div>
     </div>
   );
 }
 
 function Strong3() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="strong">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#121728] text-[13.1px] whitespace-nowrap">
-        <p className="leading-[13.12px]">$1.02</p>
+        <p className="leading-[13.12px]">{m?.[3]?.[1] ?? "—"}</p>
       </div>
     </div>
   );
@@ -276,14 +321,7 @@ function IFaLightMaskGroup3() {
 }
 
 function Down4() {
-  return (
-    <div className="h-[11.2px] relative shrink-0 w-[42.98px]" data-name="Down 2.12%">
-      <IFaLightMaskGroup3 />
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#c93444] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
-        <p className="leading-[11.2px]">2.12%</p>
-      </div>
-    </div>
-  );
+  return <Change boxClass="h-[11.2px] relative shrink-0 w-[42.98px]" dataName="Down 2.12%" fallback="2.12%" fallbackUp={false} idx={3} />;
 }
 
 function ASignalDeskTicker3() {
@@ -312,20 +350,22 @@ function TimthumbPhp4() {
 }
 
 function SpanSignalDeskTickerSymbol4() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="span.signal-desk-ticker__symbol">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
-        <p className="leading-[10.72px]">SOL</p>
+        <p className="leading-[10.72px]">{m?.[4]?.[0] ?? "SOL"}</p>
       </div>
     </div>
   );
 }
 
 function Strong4() {
+  const m = useMarket();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="strong">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#121728] text-[13.1px] whitespace-nowrap">
-        <p className="leading-[13.12px]">$75.95</p>
+        <p className="leading-[13.12px]">{m?.[4]?.[1] ?? "—"}</p>
       </div>
     </div>
   );
@@ -340,14 +380,7 @@ function IFaLightMaskGroup4() {
 }
 
 function Down2() {
-  return (
-    <div className="h-[11.2px] relative shrink-0 w-[42.98px]" data-name="Down 1.67%">
-      <IFaLightMaskGroup4 />
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#c93444] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
-        <p className="leading-[11.2px]">1.67%</p>
-      </div>
-    </div>
-  );
+  return <Change boxClass="h-[11.2px] relative shrink-0 w-[42.98px]" dataName="Down 1.67%" fallback="1.67%" fallbackUp={false} idx={4} />;
 }
 
 function ASignalDeskTicker4() {
@@ -362,7 +395,11 @@ function ASignalDeskTicker4() {
 }
 
 function Image1() {
-  return <div className="relative shrink-0 size-[22px]" data-name="image" />;
+  return (
+    <div className="relative shrink-0 size-[22px]" data-name="image">
+      <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgTimthumbPhp5} />
+    </div>
+  );
 }
 
 function Image() {
@@ -374,20 +411,22 @@ function Image() {
 }
 
 function SpanSignalDeskTickerSymbol5() {
+  const m = useMarket();
   return (
     <div className="-translate-y-1/2 absolute content-stretch flex flex-col items-start left-[28.08px] top-[calc(50%+0.14px)]" data-name="span.signal-desk-ticker__symbol">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
-        <p className="leading-[10.72px]">TRX</p>
+        <p className="leading-[10.72px]">{m?.[5]?.[0] ?? "TRX"}</p>
       </div>
     </div>
   );
 }
 
 function Strong5() {
+  const m = useMarket();
   return (
     <div className="-translate-y-1/2 absolute content-stretch flex flex-col items-start left-[58.17px] top-[calc(50%+0.44px)]" data-name="strong">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#121728] text-[13.1px] whitespace-nowrap">
-        <p className="leading-[13.12px]">$0.33</p>
+        <p className="leading-[13.12px]">{m?.[5]?.[1] ?? "—"}</p>
       </div>
     </div>
   );
@@ -402,14 +441,7 @@ function IFaLightMaskGroup5() {
 }
 
 function Up() {
-  return (
-    <div className="-translate-y-1/2 absolute h-[11.2px] left-[97.06px] top-[calc(50%-0.01px)] w-[42.98px]" data-name="Up 0.32%">
-      <IFaLightMaskGroup5 />
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#087b55] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
-        <p className="leading-[11.2px]">0.32%</p>
-      </div>
-    </div>
-  );
+  return <Change boxClass="-translate-y-1/2 absolute h-[11.2px] left-[97.06px] top-[calc(50%-0.01px)] w-[42.98px]" dataName="Up 0.32%" fallback="0.32%" fallbackUp={true} idx={5} />;
 }
 
 function ASignalDeskTicker5() {
@@ -424,7 +456,11 @@ function ASignalDeskTicker5() {
 }
 
 function Image3() {
-  return <div className="relative shrink-0 size-[22px]" data-name="image" />;
+  return (
+    <div className="relative shrink-0 size-[22px]" data-name="image">
+      <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgTimthumbPhp6} />
+    </div>
+  );
 }
 
 function Image2() {
@@ -436,20 +472,22 @@ function Image2() {
 }
 
 function SpanSignalDeskTickerSymbol6() {
+  const m = useMarket();
   return (
     <div className="-translate-y-1/2 absolute content-stretch flex flex-col items-start left-[28.07px] top-[calc(50%+0.14px)]" data-name="span.signal-desk-ticker__symbol">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#687086] text-[10.7px] tracking-[0.858px] uppercase whitespace-nowrap">
-        <p className="leading-[10.72px]">HYPE</p>
+        <p className="leading-[10.72px]">{m?.[6]?.[0] ?? "HYPE"}</p>
       </div>
     </div>
   );
 }
 
 function Strong6() {
+  const m = useMarket();
   return (
     <div className="-translate-y-1/2 absolute content-stretch flex flex-col items-start left-[66.78px] top-[calc(50%+0.44px)]" data-name="strong">
       <div className="[word-break:break-word] flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#121728] text-[13.1px] whitespace-nowrap">
-        <p className="leading-[13.12px]">$55.05</p>
+        <p className="leading-[13.12px]">{m?.[6]?.[1] ?? "—"}</p>
       </div>
     </div>
   );
@@ -464,14 +502,7 @@ function IFaLightMaskGroup6() {
 }
 
 function Up1() {
-  return (
-    <div className="-translate-y-1/2 absolute h-[11.2px] left-[112.97px] top-[calc(50%-0.01px)] w-[42.98px]" data-name="Up 0.40%">
-      <IFaLightMaskGroup6 />
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Arimo:Bold',sans-serif] font-bold justify-center leading-[0] left-[11.25px] text-[#087b55] text-[11.2px] top-[calc(50%-0.6px)] whitespace-nowrap">
-        <p className="leading-[11.2px]">0.40%</p>
-      </div>
-    </div>
-  );
+  return <Change boxClass="-translate-y-1/2 absolute h-[11.2px] left-[112.97px] top-[calc(50%-0.01px)] w-[42.98px]" dataName="Up 0.40%" fallback="0.40%" fallbackUp={true} idx={6} />;
 }
 
 function ASignalDeskTicker6() {
@@ -553,19 +584,61 @@ function SpanSignalDeskMarketStripStatus() {
   );
 }
 
+function TickerFlowItem({ children }: { children: ReactNode }) {
+  return <div className="flex min-h-[44px] shrink-0 items-center gap-[6.1px] py-[11px] pr-[36px]">{children}</div>;
+}
+
 function TopCryptoTickers() {
   return (
-    <div className="backdrop-blur-[7px] bg-[rgba(255,255,255,0.9)] border-[#e2e6ef] border-b border-solid h-[48px] min-h-[48px] overflow-auto relative shrink-0 w-[385px]" data-name="Top crypto tickers">
-      <ASignalDeskTicker />
-      <ASignalDeskTicker1 />
-      <ASignalDeskTicker2 />
-      <ASignalDeskTicker3 />
-      <ASignalDeskTicker4 />
-      <ASignalDeskTicker5 />
-      <ASignalDeskTicker6 />
-      <ASignalDeskTicker7 />
-      <SpanSignalDeskMarketStripStatus />
-    </div>
+    <TickerMarquee
+      className="backdrop-blur-[7px] bg-[rgba(255,255,255,0.9)] border-[#e2e6ef] border-b border-solid flex h-[48px] min-h-[48px] items-center relative shrink-0 w-[385px]"
+      dataName="Top crypto tickers"
+      gap={0}
+      speed={1.1}
+    >
+      <TickerFlowItem>
+        <TimthumbPhp />
+        <SpanSignalDeskTickerSymbol />
+        <Strong />
+        <Down3 />
+      </TickerFlowItem>
+      <TickerFlowItem>
+        <TimthumbPhp1 />
+        <SpanSignalDeskTickerSymbol1 />
+        <Strong1 />
+        <Down5 />
+      </TickerFlowItem>
+      <TickerFlowItem>
+        <TimthumbPhp2 />
+        <SpanSignalDeskTickerSymbol2 />
+        <Strong2 />
+        <Down />
+      </TickerFlowItem>
+      <TickerFlowItem>
+        <TimthumbPhp3 />
+        <SpanSignalDeskTickerSymbol3 />
+        <Strong3 />
+        <Down4 />
+      </TickerFlowItem>
+      <TickerFlowItem>
+        <TimthumbPhp4 />
+        <SpanSignalDeskTickerSymbol4 />
+        <Strong4 />
+        <Down2 />
+      </TickerFlowItem>
+      <TickerFlowItem>
+        <Image1 />
+        <SpanSignalDeskTickerSymbol idx={5} fallback="TRX" />
+        <Strong idx={5} />
+        <Change boxClass="h-[11.2px] relative shrink-0 w-[42.98px]" dataName="Up 0.32%" fallback="0.32%" fallbackUp={true} idx={5} />
+      </TickerFlowItem>
+      <TickerFlowItem>
+        <Image3 />
+        <SpanSignalDeskTickerSymbol idx={6} fallback="HYPE" />
+        <Strong idx={6} />
+        <Change boxClass="h-[11.2px] relative shrink-0 w-[42.98px]" dataName="Up 0.40%" fallback="0.40%" fallbackUp={true} idx={6} />
+      </TickerFlowItem>
+    </TickerMarquee>
   );
 }
 
@@ -585,13 +658,13 @@ function DivPcCvU() {
   );
 }
 
-function ClipPathGroup() {
+function ClipPathGroup({ hidden = false, bare = false }: { hidden?: boolean; bare?: boolean }) {
   const d = useMobileHome();
   return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[15.23px] mt-[127px] place-items-start relative row-1" data-name="Clip path group" onClick={() => { const href = articleUrl(d?.hero?.href ?? null); if (href) window.location.href = href; }}>
+    <div className={`col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ${bare ? "" : "ml-[15.23px] mt-[127px]"} place-items-start relative row-1 ${hidden ? "invisible" : ""}`} data-name="Clip path group" onClick={() => { const href = articleUrl(d?.hero?.href ?? null); if (href) window.location.href = href; }}>
       <div className="col-1 h-[211.083px] mask-alpha mask-intersect mask-no-clip mask-no-repeat mask-position-[-0.766px_-0.38px] mask-size-[360.547px_211.083px] ml-[0.77px] mt-[0.38px] relative row-1 w-[360.547px]" style={{ maskImage: `url("${imgRectangle}")` }} data-name="Rectangle">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgRectangle1} />
+          <img alt={d?.hero?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.hero?.imageUrl) ?? imgRectangle1} />
         </div>
       </div>
     </div>
@@ -599,12 +672,13 @@ function ClipPathGroup() {
 }
 
 function ANPLaK() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-col h-[14px] items-start relative shrink-0" data-name="a.nPLaK">
       <div className="h-[14px] relative shrink-0 w-[328px]" data-name="اقتصاد دیجیتال">
         <div className="[word-break:break-word] absolute flex flex-col font-['IRANSansX:Medium',sans-serif] inset-0 justify-center leading-[0] not-italic text-[#990108] text-[14px] text-right tracking-[-0.28px]">
           <p className="leading-[14px]" dir="auto">
-            معاون علمی رئیس جمهور:
+            {d?.hero?.kicker ?? "معاون علمی رئیس جمهور:"}
           </p>
         </div>
       </div>
@@ -621,12 +695,13 @@ function DivAbcnewsRssource112435326Tags() {
 }
 
 function H2AbcnewsRssource112435326Headline() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-col items-start overflow-clip relative shrink-0 w-full" data-name="h2#abcnews-rssource-112435326headline">
-      <div className="h-[52px] relative shrink-0 w-[330px]" data-name="قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران">
-        <div className="[word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] inset-0 justify-center leading-[0] not-italic text-[#141618] text-[22.1px] text-right">
+      <div className="min-h-[52px] relative shrink-0 w-[330px]" data-name="قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران">
+        <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] w-full justify-center leading-[0] not-italic text-[#141618] text-[22.1px] text-right">
           <p className="leading-[28px]" dir="auto">
-            قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران
+            {d?.hero?.title ?? "قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران"}
           </p>
         </div>
       </div>
@@ -637,7 +712,7 @@ function H2AbcnewsRssource112435326Headline() {
 function DivCjafl() {
   const d = useMobileHome();
   return (
-    <div className="content-stretch flex flex-col h-[74px] items-end relative shrink-0 w-full" data-name="div.CJAFL" onClick={() => { const href = articleUrl(d?.hero?.href ?? null); if (href) window.location.href = href; }}>
+    <div className="content-stretch flex flex-col min-h-[74px] items-end relative shrink-0 w-full" data-name="div.CJAFL" onClick={() => { const href = articleUrl(d?.hero?.href ?? null); if (href) window.location.href = href; }}>
       <DivAbcnewsRssource112435326Tags />
       <H2AbcnewsRssource112435326Headline />
     </div>
@@ -646,18 +721,20 @@ function DivCjafl() {
 
 function BlancheMeetsWith2KeyRepublicanSenatorsAheadOfConfirmationVote() {
   return (
-    <div className="content-stretch flex flex-col h-[74px] items-start relative shrink-0 w-full" data-name="Blanche meets with 2 key Republican senators ahead of confirmation vote">
+    <div className="content-stretch flex flex-col min-h-[74px] items-start relative shrink-0 w-full" data-name="Blanche meets with 2 key Republican senators ahead of confirmation vote">
       <DivCjafl />
     </div>
   );
 }
 
 function DivIPMwx() {
+  const d = useMobileHome();
   return (
-    <div className="content-stretch flex flex-col h-[73px] items-start relative shrink-0 w-full" data-name="div.iPMwx">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] h-[46px] justify-center leading-[0] not-italic relative shrink-0 text-[#22252a] text-[12.6px] text-right w-full">
+    <div className="content-stretch flex flex-col min-h-[73px] items-start relative shrink-0 w-full" data-name="div.iPMwx">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] min-h-[46px] justify-center leading-[0] not-italic relative shrink-0 text-[#22252a] text-[12.6px] text-right w-full">
         <p className="leading-[20px]" dir="auto">
-          حسین افشین، معاون علمی رئیس‌جمهور از تغییر رویکرد سیاست‌گذاری علم و فناوری کشور خبر داد و «قدرت‌بنیان» را پارادایم جدید حکمرانی فناوری ایران معرفی کرد
+          {d?.hero?.lead ??
+            "حسین افشین، معاون علمی رئیس‌جمهور از تغییر رویکرد سیاست‌گذاری علم و فناوری کشور خبر داد و «قدرت‌بنیان» را پارادایم جدید حکمرانی فناوری ایران معرفی کرد"}
         </p>
       </div>
     </div>
@@ -666,7 +743,7 @@ function DivIPMwx() {
 
 function DivIPMwxMargin() {
   return (
-    <div className="content-stretch flex flex-col h-[78px] items-start pt-[8px] relative shrink-0 w-full" data-name="div.iPMwx:margin">
+    <div className="content-stretch flex flex-col min-h-[78px] items-start pt-[8px] relative shrink-0 w-full" data-name="div.iPMwx:margin">
       <DivIPMwx />
     </div>
   );
@@ -681,36 +758,45 @@ function DivQghKv() {
   );
 }
 
-function DivQghKvMargin() {
+function DivQghKvMargin({ hidden = false, bare = false }: { hidden?: boolean; bare?: boolean }) {
   return (
-    <div className="col-1 content-stretch flex flex-col h-[183px] items-start ml-[12.5px] mt-[338.5px] py-[16px] relative row-1 w-[362px]" data-name="div.QGHKv:margin">
+    <div className={`col-1 content-stretch flex flex-col min-h-[183px] items-start ${bare ? "w-full" : "ml-[12.5px] mt-[338.5px] w-[362px]"} py-[16px] relative row-1 ${hidden ? "invisible" : ""}`} data-name="div.QGHKv:margin">
       <DivQghKv />
     </div>
   );
 }
 
-function Group() {
+// Hero card (image + text block). The gray box now grows with the text
+// instead of being a fixed-height SVG, so long titles/leads stay inside it.
+function HeroCard({ loading }: { loading: boolean }) {
   return (
-    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0" data-name="Group">
-      <div className="col-1 h-[522px] ml-0 mt-0 relative row-1 w-[390px]" data-name="Vector">
-        <svg className="absolute block inset-0 size-full" fill="none" height="522" preserveAspectRatio="none" viewBox="0 0 390 522" width="390">
-          <path d="M390 0H0V522H390V0Z" fill="white" id="Vector" />
-        </svg>
-      </div>
-      <div className="col-1 h-[72px] ml-px mt-0 relative row-1 w-[388px]" data-name="Vector">
-        <svg className="absolute block inset-0 size-full" fill="none" height="72" preserveAspectRatio="none" viewBox="0 0 388 72" width="388">
-          <path d="M388 0H0V72H388V0Z" fill="#C93035" id="Vector" />
+    <div className="col-1 ml-[15.5px] mt-[126.5px] relative row-1 w-[361px] overflow-hidden rounded-[6px] bg-[#f4f5f6]" data-name="hero-card">
+      <ClipPathGroup bare hidden={loading} />
+      <DivQghKvMargin bare hidden={loading} />
+    </div>
+  );
+}
+
+function HeaderGroup() {
+  const home = useHomeData();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const nav: NavItem[] = home?.nav ?? [];
+  return (
+    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0 w-[390px] sticky top-0 z-40" data-name="Group.header">
+      <div className="col-1 h-[72px] ml-0 mt-0 relative row-1 w-[390px]" data-name="Vector">
+        <svg className="absolute block inset-0 size-full" fill="none" height="72" preserveAspectRatio="none" viewBox="0 0 390 72" width="390">
+          <path d="M390 0H0V72H390V0Z" fill="#C93035" id="Vector" />
         </svg>
       </div>
       <DivPcCvU />
       <div className="col-1 ml-[16.93px] mt-[4.96px] relative row-1 size-[61.276px]" data-name="Vector">
         <svg className="absolute block inset-0 size-full" fill="none" height="61.276" preserveAspectRatio="none" viewBox="0 0 61.276 61.276" width="61.276">
-          <path d="M61.276 0H0V61.276H61.276V0Z" fill="#CF3038" id="Vector" />
+          <path d="M61.276 0H0V61.276H61.276V0Z" fill="#C93035" id="Vector" />
         </svg>
       </div>
-      <div className="col-1 h-[71px] ml-[10px] mt-0 relative row-1 w-[76px]" data-name="IMG_20260802_154108_585 2">
+      <div className="col-1 h-[69px] ml-[12px] mt-[2px] relative row-1 w-[76px]" data-name="IMG_20260802_154108_585 2">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img alt="" className="absolute h-full left-[-3.58%] max-w-none top-0 w-[100.6%]" src={imgImg202608021541085852} />
+          <img alt="ECO TIMES" className="absolute inset-0 object-contain size-full" src={imgLogo} />
         </div>
       </div>
       <div className="col-1 ml-[309px] mt-[26px] relative row-1 size-[19.635px]" data-name="Vector">
@@ -731,51 +817,83 @@ function Group() {
           </div>
         </div>
       </div>
-      <div className="col-1 h-0 ml-[351.41px] mt-[26.96px] relative row-1 w-[22.682px]" data-name="Vector" onClick={() => { window.location.href = `${API_URL}/admin`; }}>
+<div className="col-1 h-0 ml-[351.41px] mt-[26.96px] relative row-1 w-[22.682px]" data-name="Vector" onClick={() => setMenuOpen((v) => !v)}>
         <div className="absolute inset-[-1.35px_0]">
           <svg className="block size-full" fill="none" height="2.70833" preserveAspectRatio="none" viewBox="0 0 22.6823 2.70833" width="22.6823">
             <path d="M0 1.35417H22.6823" id="Vector" stroke="white" strokeWidth="2.70833" />
           </svg>
         </div>
       </div>
-      <div className="col-1 h-0 ml-[351.41px] mt-[35.77px] relative row-1 w-[22.682px]" data-name="Vector" onClick={() => { window.location.href = `${API_URL}/admin`; }}>
+      <div className="col-1 h-0 ml-[351.41px] mt-[35.77px] relative row-1 w-[22.682px]" data-name="Vector" onClick={() => setMenuOpen((v) => !v)}>
         <div className="absolute inset-[-1.35px_0]">
           <svg className="block size-full" fill="none" height="2.70833" preserveAspectRatio="none" viewBox="0 0 22.6823 2.70833" width="22.6823">
             <path d="M0 1.35417H22.6823" id="Vector" stroke="white" strokeWidth="2.70833" />
           </svg>
         </div>
       </div>
-      <div className="col-1 h-0 ml-[351.41px] mt-[44.57px] relative row-1 w-[22.682px]" data-name="Vector" onClick={() => { window.location.href = `${API_URL}/admin`; }}>
+      <div className="col-1 h-0 ml-[351.41px] mt-[44.57px] relative row-1 w-[22.682px]" data-name="Vector" onClick={() => setMenuOpen((v) => !v)}>
         <div className="absolute inset-[-1.35px_0]">
           <svg className="block size-full" fill="none" height="2.70833" preserveAspectRatio="none" viewBox="0 0 22.6823 2.70833" width="22.6823">
             <path d="M0 1.35417H22.6823" id="Vector" stroke="white" strokeWidth="2.70833" />
           </svg>
         </div>
       </div>
-      <div className="col-1 h-[395px] ml-[15.5px] mt-[126.5px] relative row-1 w-[361px]" data-name="Vector">
-        <svg className="absolute block inset-0 size-full" fill="none" height="395" preserveAspectRatio="none" viewBox="0 0 361 395" width="361">
-          <path d={svgPaths.pad64f00} fill="#F4F5F6" id="Vector" />
+      {menuOpen && (
+        <div className="absolute left-0 right-0 top-[72px] z-50 bg-white shadow-xl" data-name="mobile-menu" dir="rtl" onClick={() => setMenuOpen(false)}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 px-5 py-4">
+            {nav.map((item) => (
+              <a
+                className="border-b border-[#f0f1f3] py-3 text-[13px] font-bold text-[#141618] transition-colors hover:text-[#990108]"
+                href={item.href === "/" ? "/" : `${API_URL}${item.href}`}
+                key={item.label}
+              >
+                {item.label}
+              </a>
+            ))}
+            <a className="border-b border-[#f0f1f3] py-3 text-[13px] font-bold text-[#141618] transition-colors hover:text-[#990108]" href="#videos">
+              ویدیو
+            </a>
+            <a className="border-b border-[#f0f1f3] py-3 text-[13px] font-bold text-[#141618] transition-colors hover:text-[#990108]" href="#photos">
+              عکس
+            </a>
+          </div>
+        </div>
+      )}
+      </div>
+  );
+}
+
+function Group() {
+  const home = useHomeData();
+  const loading = home === null;
+  return (
+    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0 w-[390px] mt-[-72px]" data-name="Group">
+      <div className="col-1 h-[522px] ml-0 mt-0 relative row-1 w-[390px]" data-name="Vector">
+        <svg className="absolute block inset-0 size-full" fill="none" height="522" preserveAspectRatio="none" viewBox="0 0 390 522" width="390">
+          <path d="M390 0H0V522H390V0Z" fill="white" id="Vector" />
         </svg>
       </div>
-      <ClipPathGroup />
-      <div className="col-1 h-[183px] ml-[15.5px] mt-[338.5px] relative row-1 w-[360px]" data-name="Vector">
-        <svg className="absolute block inset-0 size-full" fill="none" height="183" preserveAspectRatio="none" viewBox="0 0 360 183" width="360">
-          <path d="M360 0H0V183H174.001H360V0Z" fill="#F4F5F6" id="Vector" />
-        </svg>
-      </div>
-      <DivQghKvMargin />
+      <HeroCard loading={loading} />
     </div>
   );
 }
 
 function AbcNewsLiveAbcMl2502101739199021469HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="absolute inset-[-0.31%_0_0.42%_0] overflow-clip" data-name="abc_news_live-abc-ml-250210_1739199021469_hpMain_16x9.jpg">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgAbcNewsLiveAbcMl2502101739199021469HpMain16X9Jpg} />
-      </div>
       <div className="absolute h-[211px] left-[-6px] top-0 w-[374px]" data-name="ChatGPT Image Aug 6, 2026, 01_16_30 PM 1">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgChatGptImageAug62026011630Pm1} />
+        {d?.video?.isUploadedVideo ? (
+          <>
+            <img alt="" aria-hidden="true" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgChatGptImageAug62026011630Pm1} />
+            <AutoPlayVideo post={d.video} />
+            <div className="absolute content-stretch flex inset-0 items-center justify-center pointer-events-none" data-name="div.MediaPlaceholder__Overlay">
+              <PlayVideo />
+            </div>
+          </>
+        ) : (
+          <img alt={d?.video?.imageAlt ?? ""} className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={absoluteAsset(d?.video?.imageUrl) ?? imgChatGptImageAug62026011630Pm1} />
+        )}
       </div>
     </div>
   );
@@ -807,6 +925,8 @@ function PlayVideo() {
 }
 
 function DivMediaPlaceholderOverlay() {
+  const d = useMobileHome();
+  if (d?.video?.isUploadedVideo) return null;
   return (
     <div className="absolute content-stretch flex inset-[-0.63px_0_0.63px_0] items-center justify-center" data-name="div.MediaPlaceholder__Overlay">
       <PlayVideo />
@@ -845,7 +965,7 @@ function DivCjafl1() {
 
 function WorldNewsNow() {
   return (
-    <div className="content-stretch flex flex-col items-start relative shrink-0 w-[290px]" data-name="World News Now">
+    <div className="content-stretch flex flex-col items-start relative shrink-0 w-[284px]" data-name="World News Now">
       <DivCjafl1 />
     </div>
   );
@@ -879,8 +999,8 @@ function SpanCsJky() {
 
 function SpanQxdkt() {
   return (
-    <div className="content-stretch flex flex-col items-start overflow-clip relative shrink-0" data-name="span.QXDKT">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white tracking-[-0.28px] whitespace-nowrap">
+    <div className="content-stretch flex flex-col items-start justify-center relative shrink-0" data-name="span.QXDKT">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[13px] text-white tracking-[-0.28px] whitespace-nowrap">
         <p className="leading-[14px]">VIDEO</p>
       </div>
     </div>
@@ -889,7 +1009,7 @@ function SpanQxdkt() {
 
 function DivThemeJfHmw() {
   return (
-    <div className="bg-[#990108] border-2 border-[rgba(0,0,0,0)] border-solid content-stretch flex gap-[4px] h-[24px] items-center justify-center px-[5px] relative rounded-[4px] shrink-0 w-[61px]" data-name="div.theme-JfHmw">
+    <div className="bg-[#990108] border-2 border-[rgba(0,0,0,0)] border-solid content-stretch flex gap-[4px] h-[24px] items-center justify-center px-[5px] relative rounded-[4px] shrink-0 w-[67px]" data-name="div.theme-JfHmw">
       <SpanCsJky />
       <SpanQxdkt />
     </div>
@@ -924,11 +1044,12 @@ function DivLiveVideoCard() {
 }
 
 function ANPLaK1() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[13.9px] text-right tracking-[-0.28px] w-[191px]">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[191px]">
         <p className="leading-[14px]" dir="auto">
-          سلامت و درمان
+          {d?.grid[0]?.category ?? "سلامت و درمان"}
         </p>
       </div>
     </div>
@@ -946,13 +1067,13 @@ function DivFdAapprovesModernasmtags() {
 function H2FdAapprovesModernasmheadline() {
   const d = useMobileHome();
   return (
-    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[5.61px] relative self-stretch" data-name="h2#FDAapprovesModernasmheadline">
-      <div className="h-[48px] relative shrink-0 w-[187.36px]" data-name="هوش مصنوعی در اتاق عمل؛ افزایش دقت جراحی با استفاده از فناوری‌های هوشمند">
-        <a className="[word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] inset-[0_-2.67%_0_2.67%] justify-center leading-[0] not-italic text-[#141618] text-[13.1px] text-right" href={articleUrl(d?.grid[0]?.href ?? null) ?? "#"}>
-          <p className="cursor-pointer leading-[18px]" dir="auto">
-            هوش مصنوعی در اتاق عمل؛ افزایش دقت جراحی با استفاده از فناوری‌های هوشمند
-          </p>
-        </a>
+    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px pr-[5.61px] relative self-stretch" data-name="h2#FDAapprovesModernasmheadline">
+      <div className="min-h-[32px] flex flex-col justify-start relative shrink-0 w-[191px]" data-name="هوش مصنوعی در اتاق عمل؛ افزایش دقت جراحی با استفاده از فناوری‌های هوشمند">
+        <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right w-full" href={articleUrl(d?.grid[0]?.href ?? null) ?? "#"}>
+            <p className="cursor-pointer leading-[18px]" dir="auto">
+              {d?.grid[0]?.title ?? "هوش مصنوعی در اتاق عمل؛ افزایش دقت جراحی با استفاده از فناوری‌های هوشمند"}
+            </p>
+          </a>
       </div>
     </div>
   );
@@ -984,10 +1105,11 @@ function DivQghKv2() {
 }
 
 function ModernaHqApJt2608041785874475703HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="moderna-hq-ap-jt-260804_1785874475703_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgModernaHqApJt2608041785874475703HpMain16X9Jpg} />
+        <img alt={d?.grid[0]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.grid[0]?.imageUrl) ?? imgModernaHqApJt2608041785874475703HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -1027,12 +1149,13 @@ function DivLiAe() {
 }
 
 function ANPLaK2() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
-      <div className="h-[14px] relative shrink-0 w-[189px]" data-name="سلامت و درمان">
-        <div className="[word-break:break-word] absolute flex flex-col font-['IRANSansX:Medium',sans-serif] inset-[0_-1.59%_0_1.59%] justify-center leading-[0] not-italic text-[#990108] text-[14px] text-right tracking-[-0.28px]">
+      <div className="h-[14px] relative shrink-0 w-[191px]" data-name="سلامت و درمان">
+        <div className="[word-break:break-word] absolute flex flex-col font-['IRANSansX:Medium',sans-serif] inset-0 justify-center leading-[0] not-italic text-[#990108] text-[14px] text-right tracking-[-0.28px]">
           <p className="leading-[14px]" dir="auto">
-            سلامت و درمان
+            {d?.grid[1]?.category ?? "سلامت و درمان"}
           </p>
         </div>
       </div>
@@ -1051,13 +1174,13 @@ function DivCyclosporiasisoutbretags() {
 function H2Cyclosporiasisoutbreheadline() {
   const d = useMobileHome();
   return (
-    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[13.8px] relative self-stretch" data-name="h2#Cyclosporiasisoutbreheadline">
-      <div className="h-[32px] relative shrink-0 w-[187.36px]" data-name="سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسان">
-        <a className="[word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] inset-[0_-2.67%_0_2.67%] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right" href={articleUrl(d?.grid[1]?.href ?? null) ?? "#"}>
-          <p className="cursor-pointer leading-[18px]" dir="auto">
-            سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسان
-          </p>
-        </a>
+    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px pr-[13.8px] relative self-stretch" data-name="h2#Cyclosporiasisoutbreheadline">
+      <div className="min-h-[32px] flex flex-col justify-start relative shrink-0 w-[191px]" data-name="سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسان">
+        <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right w-full" href={articleUrl(d?.grid[1]?.href ?? null) ?? "#"}>
+            <p className="cursor-pointer leading-[18px]" dir="auto">
+              {d?.grid[1]?.title ?? "سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسان"}
+            </p>
+          </a>
       </div>
     </div>
   );
@@ -1089,10 +1212,11 @@ function DivQghKv3() {
 }
 
 function CyclosporiasisGtyGmh2608031785774719590HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="cyclosporiasis-gty-gmh-260803_1785774719590_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgCyclosporiasisGtyGmh2608031785774719590HpMain16X9Jpg} />
+        <img alt={d?.grid[1]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.grid[1]?.imageUrl) ?? imgCyclosporiasisGtyGmh2608031785774719590HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -1132,11 +1256,12 @@ function DivLiAe1() {
 }
 
 function ANPLaK3() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[191px]">
         <p className="leading-[14px]" dir="auto">
-          اقتصاددیجیتال
+          {d?.grid[2]?.category ?? "اقتصاددیجیتال"}
         </p>
       </div>
     </div>
@@ -1154,11 +1279,11 @@ function DivFederalofficialsconftags() {
 function H2Federalofficialsconfheadline() {
   const d = useMobileHome();
   return (
-    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[5.97px] relative self-stretch" data-name="h2#Federalofficialsconfheadline">
-      <div className="h-[32px] relative shrink-0 w-[187.36px]" data-name="تحول دیجیتال در خدمات درمانی بریتانیا با استفاده از هوش مصنوعی">
-        <a className="[word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] inset-[0_-2.67%_0_2.67%] justify-center leading-[0] not-italic text-[#141618] text-[12.9px] text-right" href={articleUrl(d?.grid[2]?.href ?? null) ?? "#"}>
+    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px pr-[5.97px] relative self-stretch" data-name="h2#Federalofficialsconfheadline">
+      <div className="min-h-[32px] flex flex-col justify-start relative shrink-0 w-[191px]" data-name="تحول دیجیتال در خدمات درمانی بریتانیا با استفاده از هوش مصنوعی">
+        <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right w-full" href={articleUrl(d?.grid[2]?.href ?? null) ?? "#"}>
           <p className="cursor-pointer leading-[18px]" dir="auto">
-            تحول دیجیتال در خدمات درمانی بریتانیا با استفاده از هوش مصنوعی
+            {d?.grid[2]?.title ?? "تحول دیجیتال در خدمات درمانی بریتانیا با استفاده از هوش مصنوعی"}
           </p>
         </a>
       </div>
@@ -1192,10 +1317,11 @@ function DivQghKv4() {
 }
 
 function MarineOneTrumpGtyBh2608051785956524669HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="Marine-one-trump-gty-bh-260805_1785956524669_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgMarineOneTrumpGtyBh2608051785956524669HpMain16X9Jpg} />
+        <img alt={d?.grid[2]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.grid[2]?.imageUrl) ?? imgMarineOneTrumpGtyBh2608051785956524669HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -1235,11 +1361,12 @@ function DivLiAe2() {
 }
 
 function ANPLaK4() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[190px]">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[191px]">
         <p className="leading-[14px]" dir="auto">
-          سلامت و درمان
+          {d?.grid[3]?.category ?? "سلامت و درمان"}
         </p>
       </div>
     </div>
@@ -1258,12 +1385,11 @@ function H2AlexMurdaughslawsuitheadline() {
   const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[6.81px] relative self-stretch" data-name="h2#AlexMurdaughslawsuitheadline">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[0px] text-right w-full">
-        <p className="text-[12.8px]" dir="auto">
-          <a className="cursor-pointer leading-[16px]" href={articleUrl(d?.grid[3]?.href ?? null) ?? "#"}>
-            <span>برچسب هوشمند پایش لحظه ­ای استرس</span>
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[13px] text-right w-[191px]">
+        <p dir="auto">
+          <a className="cursor-pointer leading-[18px]" href={articleUrl(d?.grid[3]?.href ?? null) ?? "#"}>
+            {d?.grid[3]?.title ?? "برچسب هوشمند پایش لحظه ­ای استرس"}
           </a>
-          <span className="leading-[16px]">ريال</span>
         </p>
       </div>
     </div>
@@ -1296,10 +1422,11 @@ function DivQghKv5() {
 }
 
 function AlexMurdaugh2HtGmh2606291782748529819HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="Alex-Murdaugh-2-ht-gmh-260629_1782748529819_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgAlexMurdaugh2HtGmh2606291782748529819HpMain16X9Jpg} />
+        <img alt={d?.grid[3]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.grid[3]?.imageUrl) ?? imgAlexMurdaugh2HtGmh2606291782748529819HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -1339,11 +1466,12 @@ function DivLiAe3() {
 }
 
 function ANPLaK5() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0 w-[193px]" data-name="a.nPLaK">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[190px]">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[191px]">
         <p className="leading-[14px]" dir="auto">
-          اقتصاددیجیتال
+          {d?.grid[4]?.category ?? "اقتصاددیجیتال"}
         </p>
       </div>
     </div>
@@ -1361,12 +1489,14 @@ function DivInsideTrumpscontentitags() {
 function H2InsideTrumpscontentiheadline() {
   const d = useMobileHome();
   return (
-    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[3.39px] relative self-stretch" data-name="h2#InsideTrumpscontentiheadline">
-      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[12.9px] text-right w-[192px]" href={articleUrl(d?.grid[4]?.href ?? null) ?? "#"}>
-        <p className="cursor-pointer leading-[18px]" dir="auto">
-          معماری جدید حکمرانی علم و فناوری کلید خورد
-        </p>
-      </a>
+    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px pr-[3.39px] relative self-stretch" data-name="h2#InsideTrumpscontentiheadline">
+      <div className="min-h-[32px] flex flex-col justify-start relative shrink-0 w-[191px]">
+        <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right w-full" href={articleUrl(d?.grid[4]?.href ?? null) ?? "#"}>
+          <p className="cursor-pointer leading-[18px]" dir="auto">
+            {d?.grid[4]?.title ?? "معماری جدید حکمرانی علم و فناوری کلید خورد"}
+          </p>
+        </a>
+      </div>
     </div>
   );
 }
@@ -1397,10 +1527,11 @@ function DivQghKv6() {
 }
 
 function Pirro1GtyGmh2608031785790335622HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="pirro-1-gty-gmh-260803_1785790335622_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgPirro1GtyGmh2608031785790335622HpMain16X9Jpg} />
+        <img alt={d?.grid[4]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.grid[4]?.imageUrl) ?? imgPirro1GtyGmh2608031785790335622HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -1440,11 +1571,12 @@ function DivLiAe4() {
 }
 
 function ANPLaK6() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0 w-[188px]" data-name="a.nPLaK">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[188px]">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[191px]">
         <p className="leading-[14px]" dir="auto">
-          هوش مصنوعی
+          {d?.grid[5]?.category ?? "هوش مصنوعی"}
         </p>
       </div>
     </div>
@@ -1462,12 +1594,14 @@ function DivAImodelsusedfakeIDsttags() {
 function H2AImodelsusedfakeIDstheadline() {
   const d = useMobileHome();
   return (
-    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[10.28px] relative self-stretch" data-name="h2#AImodelsusedfakeIDstheadline">
-      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[13px] text-right w-full" href={articleUrl(d?.grid[5]?.href ?? null) ?? "#"}>
-        <p className="cursor-pointer leading-[18px]" dir="auto">
-          هوش مصنوعی برای پیشگیری از بیماری‌های مغزی
-        </p>
-      </a>
+    <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px pr-[10.28px] relative self-stretch" data-name="h2#AImodelsusedfakeIDstheadline">
+      <div className="min-h-[32px] flex flex-col justify-start relative shrink-0 w-[191px]">
+        <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right w-full" href={articleUrl(d?.grid[5]?.href ?? null) ?? "#"}>
+          <p className="cursor-pointer leading-[18px]" dir="auto">
+            {d?.grid[5]?.title ?? "هوش مصنوعی برای پیشگیری از بیماری‌های مغزی"}
+          </p>
+        </a>
+      </div>
     </div>
   );
 }
@@ -1498,10 +1632,11 @@ function DivQghKv7() {
 }
 
 function AnthropicGtyJef2607311785503555591HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="anthropic-gty-jef-260731_1785503555591_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgAnthropicGtyJef2607311785503555591HpMain16X9Jpg} />
+        <img alt={d?.grid[5]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.grid[5]?.imageUrl) ?? imgAnthropicGtyJef2607311785503555591HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -1563,474 +1698,41 @@ function DivSccwD() {
   );
 }
 
-function H3Mexicansocialmediainheadline() {
-  const d = useMobileHome();
-  return (
-    <div className="h-[16.09px] relative shrink-0 w-[280.66px]" data-name="h3#Mexicansocialmediainheadline">
-      <div className="-translate-x-full -translate-y-1/2 absolute flex items-center justify-center left-[309px] top-[7.09px] w-[306px]">
-        <div className="-scale-y-100 flex-none rotate-180">
-          <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[#141618] text-[13px] text-right w-[306px]" href={articleUrl(d?.top[0]?.href ?? null) ?? "#"}>
-            <p className="cursor-pointer leading-[16.1px]" dir="auto">
-              فناوری ویرایش ژن به دنبال حذف ریشه‌ای HIV از بدن انسان
-            </p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl2() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[307px]" data-name="div.CJAFL">
-      <H3Mexicansocialmediainheadline />
-    </div>
-  );
-}
-
-function MexicanSocialMediaInfluencerShotAndKilled() {
-  return (
-    <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="Mexican social media influencer shot and killed">
-      <DivCjafl2 />
-    </div>
-  );
-}
-
-function DivQghKv8() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-end left-0 pb-[16px] top-[2px]" data-name="div.QGHKv">
-      <MexicanSocialMediaInfluencerShotAndKilled />
-    </div>
-  );
-}
-
-function LiWgkhB() {
-  return (
-    <div className="h-[34.59px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[9.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv8 />
-      <div className="absolute bg-[#cbced4] h-[0.5px] left-[-14px] top-[34.09px] w-[329px]" data-name="hr.rGbDS" />
-    </div>
-  );
-}
-
-function H3IcEdetaineedeathFiliheadline() {
-  const d = useMobileHome();
-  return (
-    <div className="h-[16.09px] overflow-clip relative shrink-0 w-[292.31px]" data-name="h3#ICEdetaineedeathFiliheadline">
-      <div className="-translate-x-full -translate-y-1/2 absolute flex h-[69px] items-center justify-center left-[302px] top-[8.17px] w-[302px]">
-        <div className="-scale-y-100 flex-none rotate-180">
-          <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] h-[69px] justify-center leading-[0] not-italic relative text-[#141618] text-[13px] text-right w-[302px]" href={articleUrl(d?.top[1]?.href ?? null) ?? "#"}>
-            <p className="cursor-pointer leading-[16.1px]" dir="auto">
-              هوش مصنوعی در خدمت مقابله با تهدیدات زیستی
-            </p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl3() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0" data-name="div.CJAFL">
-      <H3IcEdetaineedeathFiliheadline />
-    </div>
-  );
-}
-
-function IceDetaineeDeathFilingCitedMedicalConcerns() {
-  return (
-    <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="ICE detainee death: Filing cited medical concerns">
-      <DivCjafl3 />
-    </div>
-  );
-}
-
-function DivQghKv9() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-start left-[3px] py-[16px] top-0" data-name="div.QGHKv">
-      <IceDetaineeDeathFilingCitedMedicalConcerns />
-    </div>
-  );
-}
-
-function LiWgkhB1() {
-  return (
-    <div className="h-[48.59px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[23.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv9 />
-      <div className="absolute bg-[#cbced4] h-[0.5px] left-[-14px] top-[48.09px] w-[329px]" data-name="hr.rGbDS" />
-    </div>
-  );
-}
-
-function H3PerezHiltonsfamilyspheadline() {
-  return (
-    <div className="h-[16.09px] overflow-clip relative shrink-0 w-[288.16px]" data-name="h3#PerezHiltonsfamilyspheadline">
-      <div className="-translate-x-full -translate-y-full [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] justify-end leading-[0] left-[288.16px] not-italic text-[#141618] text-[13.1px] text-right top-[16.41px] w-[236px]">
-        <p className="leading-[16.1px]" dir="rtl">
-          بازار نرم‌افزارهای مدیریت کربن شتاب گرفت
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl4() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0" data-name="div.CJAFL">
-      <H3PerezHiltonsfamilyspheadline />
-    </div>
-  );
-}
-
-function PerezHiltonsFamilySpeaksAfterHospitalization() {
-  return (
-    <div className="flex items-center justify-center relative shrink-0 w-full">
-      <div className="-scale-y-100 flex-none rotate-180 w-full">
-        <div className="content-stretch flex items-start relative w-full" data-name="Perez Hilton's family speaks after hospitalization">
-          <DivCjafl4 />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivQghKv10() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-start left-[3px] py-[16px] top-0" data-name="div.QGHKv">
-      <PerezHiltonsFamilySpeaksAfterHospitalization />
-    </div>
-  );
-}
-
-function LiWgkhB2() {
-  return (
-    <div className="h-[48.59px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[23.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv10 />
-      <div className="absolute bg-[#cbced4] h-[0.5px] left-[-14px] top-[48.1px] w-[329px]" data-name="hr.rGbDS" />
-    </div>
-  );
-}
-
-function H3Horseracingchangesstheadline() {
-  const d = useMobileHome();
-  return (
-    <div className="h-[16.09px] overflow-clip relative shrink-0 w-[291.19px]" data-name="h3#Horseracingchangesstheadline">
-      <div className="-translate-x-full -translate-y-1/2 absolute flex items-center justify-center left-[405px] top-[7.32px] w-[405px]">
-        <div className="-scale-y-100 flex-none rotate-180">
-          <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[#141618] text-[12.9px] text-right w-[405px]" href={articleUrl(d?.top[2]?.href ?? null) ?? "#"}>
-            <p className="cursor-pointer leading-[16.1px]" dir="auto">
-              بالکن‌ها به نیروگاه‌های کوچک خورشیدی تبدیل می‌شوند
-            </p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl5() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0" data-name="div.CJAFL">
-      <H3Horseracingchangesstheadline />
-    </div>
-  );
-}
-
-function HorseRacingChangesStirTripleCrownQuestions() {
-  return (
-    <div className="content-stretch flex items-start relative shrink-0 w-[302px]" data-name="Horse racing changes stir Triple Crown questions">
-      <DivCjafl5 />
-    </div>
-  );
-}
-
-function DivQghKv11() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-start left-[3px] py-[16px] top-0" data-name="div.QGHKv">
-      <HorseRacingChangesStirTripleCrownQuestions />
-    </div>
-  );
-}
-
-function LiWgkhB3() {
-  return (
-    <div className="h-[48.59px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[23.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv11 />
-      <div className="absolute bg-[#cbced4] h-[0.5px] left-[-14px] top-[48.09px] w-[329px]" data-name="hr.rGbDS" />
-    </div>
-  );
-}
-
-function H3USmovestoshutKentuckheadline() {
-  const d = useMobileHome();
-  return (
-    <div className="h-[16.09px] overflow-clip relative shrink-0 w-[294.27px]" data-name="h3#USmovestoshutKentuckheadline">
-      <div className="-translate-x-full -translate-y-1/2 absolute flex h-[34px] items-center justify-center left-[288px] top-[7.9px] w-[288px]">
-        <div className="-scale-y-100 flex-none rotate-180">
-          <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] h-[34px] justify-center leading-[0] not-italic relative text-[#141618] text-[13px] text-right w-[288px]" href={articleUrl(d?.top[3]?.href ?? null) ?? "#"}>
-            <p className="cursor-pointer leading-[16.1px]" dir="auto">
-              هوش مصنوعی فرآیند توسعه دارو را متحول کرد
-            </p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl6() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0" data-name="div.CJAFL">
-      <H3USmovestoshutKentuckheadline />
-    </div>
-  );
-}
-
-function UsMovesToShutKentuckyOrganDonationGroup() {
-  return (
-    <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="US moves to shut Kentucky organ donation group">
-      <DivCjafl6 />
-    </div>
-  );
-}
-
-function DivQghKv12() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-start left-[3px] py-[16px] top-0" data-name="div.QGHKv">
-      <UsMovesToShutKentuckyOrganDonationGroup />
-    </div>
-  );
-}
-
-function LiWgkhB4() {
-  return (
-    <div className="h-[48.59px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[23.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv12 />
-      <div className="absolute bg-[#cbced4] h-[0.5px] left-[-14px] top-[48.09px] w-[329px]" data-name="hr.rGbDS" />
-    </div>
-  );
-}
-
-function H3Forensicexperttestifheadline() {
-  const d = useMobileHome();
-  return (
-    <div className="h-[16.09px] overflow-clip relative shrink-0 w-[277.42px]" data-name="h3#Forensicexperttestifheadline">
-      <div className="-translate-x-full -translate-y-1/2 absolute flex h-[35px] items-center justify-center left-[283px] top-[7.81px] w-[283px]">
-        <div className="-scale-y-100 flex-none rotate-180">
-          <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] h-[35px] justify-center leading-[0] not-italic relative text-[#141618] text-[13.1px] text-right w-[283px]" href={articleUrl(d?.top[4]?.href ?? null) ?? "#"}>
-            <p className="cursor-pointer leading-[16.1px]" dir="auto">
-              دانش‌بنیان‌ها؛ حلقه مفقوده بهره‌وری در اقتصاد ایران
-            </p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl7() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0" data-name="div.CJAFL">
-      <H3Forensicexperttestifheadline />
-    </div>
-  );
-}
-
-function ForensicExpertTestifiesInLindsayClancyTrial() {
-  return (
-    <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="Forensic expert testifies in Lindsay Clancy trial">
-      <DivCjafl7 />
-    </div>
-  );
-}
-
-function DivQghKv13() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-start left-[3px] py-[16px] top-0" data-name="div.QGHKv">
-      <ForensicExpertTestifiesInLindsayClancyTrial />
-    </div>
-  );
-}
-
-function LiWgkhB5() {
-  return (
-    <div className="h-[48.59px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[23.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv13 />
-      <div className="absolute bg-[#cbced4] h-[0.5px] left-[-14px] top-[48.1px] w-[329px]" data-name="hr.rGbDS" />
-    </div>
-  );
-}
-
-function H3Toddlerdiesaftergettheadline() {
-  const d = useMobileHome();
-  return (
-    <div className="h-[20px] overflow-clip relative shrink-0 w-[278px]" data-name="h3#Toddlerdiesaftergettheadline">
-      <div className="-translate-x-full -translate-y-1/2 absolute flex h-[35px] items-center justify-center left-[300px] top-[8.22px] w-[300px]">
-        <div className="-scale-y-100 flex-none rotate-180">
-          <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] h-[35px] justify-center leading-[0] not-italic relative text-[#141618] text-[12.9px] text-right w-[300px]" href={articleUrl(d?.top[5]?.href ?? null) ?? "#"}>
-            <p className="cursor-pointer leading-[16.1px]" dir="auto">
-              معماری جدید حکمرانی علم و فناوری کلید خورد
-            </p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl8() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0" data-name="div.CJAFL">
-      <H3Toddlerdiesaftergettheadline />
-    </div>
-  );
-}
-
-function ToddlerDiesAfterGettingHeadStuckInPlayset() {
-  return (
-    <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="Toddler dies after getting head stuck in playset">
-      <DivCjafl8 />
-    </div>
-  );
-}
-
-function DivQghKv14() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-start left-[3px] py-[16px] top-0" data-name="div.QGHKv">
-      <ToddlerDiesAfterGettingHeadStuckInPlayset />
-    </div>
-  );
-}
-
-function LiWgkhB6() {
-  return (
-    <div className="h-[48.59px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[23.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv14 />
-      <div className="absolute bg-[#cbced4] h-[0.5px] left-[-14px] top-[48.09px] w-[329px]" data-name="hr.rGbDS" />
-    </div>
-  );
-}
-
-function H3Newimagesofsunshowsuheadline() {
-  const d = useMobileHome();
-  return (
-    <div className="h-[16.09px] overflow-clip relative shrink-0 w-[293.64px]" data-name="h3#Newimagesofsunshowsuheadline">
-      <div className="-translate-x-full -translate-y-1/2 absolute flex h-[34px] items-center justify-center left-[211px] top-[8.13px] w-[211px]">
-        <div className="-scale-y-100 flex-none rotate-180">
-          <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] h-[34px] justify-center leading-[0] not-italic relative text-[#141618] text-[12.9px] text-right w-[211px]" href={articleUrl(d?.top[6]?.href ?? null) ?? "#"}>
-            <p className="cursor-pointer leading-[16.1px]" dir="auto">
-              سامسونگ وارد عصر ربات‌ها شد
-            </p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DivCjafl9() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative self-stretch shrink-0" data-name="div.CJAFL">
-      <H3Newimagesofsunshowsuheadline />
-    </div>
-  );
-}
-
-function NewImagesOfSunShowSurfaceInBestDetailYet() {
-  return (
-    <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="New images of sun show surface in best detail yet">
-      <DivCjafl9 />
-    </div>
-  );
-}
-
-function DivQghKv15() {
-  return (
-    <div className="absolute content-stretch flex flex-col items-start left-[3px] pt-[16px] top-0" data-name="div.QGHKv">
-      <NewImagesOfSunShowSurfaceInBestDetailYet />
-    </div>
-  );
-}
-
-function LiWgkhB7() {
-  return (
-    <div className="h-[32.39px] relative shrink-0 w-full" data-name="li.WgkhB">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] left-0 not-italic text-[#990108] text-[16px] top-[23.19px] whitespace-nowrap">
-        <ul className="ml-[-1.5em]">
-          <li className="list-disc ms-[24px]">
-            <span className="leading-[18.4px]">{` `}</span>
-          </li>
-        </ul>
-      </div>
-      <DivQghKv15 />
-    </div>
-  );
-}
+const topStoryFallbacks = [
+  "فناوری ویرایش ژن به دنبال حذف ریشه‌ای HIV از بدن انسان",
+  "هوش مصنوعی در خدمت مقابله با تهدیدات زیستی",
+  "بازار نرم‌افزارهای مدیریت کربن شتاب گرفت",
+  "بالکن‌ها به نیروگاه‌های کوچک خورشیدی تبدیل می‌شوند",
+  "هوش مصنوعی فرآیند توسعه دارو را متحول کرد",
+  "دانش‌بنیان‌ها؛ حلقه مفقوده بهره‌وری در اقتصاد ایران",
+  "معماری جدید حکمرانی علم و فناوری کلید خورد",
+  "سامسونگ وارد عصر ربات‌ها شد",
+];
 
 function UlINlEx() {
+  const d = useMobileHome();
+  const rows = d?.top.length ? d.top : topStoryFallbacks;
   return (
     <div className="flex items-center justify-center relative shrink-0">
-      <div className="-scale-y-100 flex-none rotate-180">
-        <div className="content-stretch flex flex-col items-start pl-[31px] pr-[16px] py-[16px] relative w-[362px]" data-name="ul.iNlEX">
-          <LiWgkhB />
-          <LiWgkhB1 />
-          <LiWgkhB2 />
-          <LiWgkhB3 />
-          <LiWgkhB4 />
-          <LiWgkhB5 />
-          <LiWgkhB6 />
-          <LiWgkhB7 />
-        </div>
+      <div className="content-stretch flex flex-col items-start px-[16px] py-[16px] relative w-[362px]" dir="rtl" data-name="ul.iNlEX">
+        {rows.map((row, index) => {
+          return (
+            <div
+              className={`content-stretch flex items-start gap-[10px] py-[14px] relative shrink-0 w-full ${index < rows.length - 1 ? "border-b border-[#cbced4]" : ""}`}
+              key={typeof row === "string" ? row : row.id}
+            >
+              <span className="mt-[6px] size-[5px] rounded-full bg-[#990108] shrink-0" />
+              <a
+                className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic min-w-0 flex-1 text-[#141618] text-[13px] text-right"
+                href={articleUrl(typeof row === "string" ? null : row.href) ?? "#"}
+              >
+                <p className="cursor-pointer leading-[18px]" dir="auto">
+                  {typeof row === "string" ? row : row.title}
+                </p>
+              </a>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -2047,7 +1749,7 @@ function DivRUrN() {
 
 function DivGerEc() {
   return (
-    <div className="content-stretch flex flex-col gap-[24px] h-[1065px] items-start pb-[12px] pt-[24px] px-[14px] relative shrink-0 w-full" data-name="div.GerEc">
+    <div className="content-stretch flex flex-col gap-[24px] min-h-[1065px] items-start pb-[12px] pt-[24px] px-[14px] relative shrink-0 w-full" data-name="div.GerEc">
       <DivVztd />
       <DivRUrN />
     </div>
@@ -2161,7 +1863,7 @@ function Frame10() {
 
 function H3MgPEn() {
   return (
-    <div className="content-stretch flex gap-[9px] items-center pl-px relative self-stretch shrink-0 w-[361px]" data-name="h3.MgPEn">
+    <div className="content-stretch flex gap-[7px] items-center pl-px relative self-stretch shrink-0 w-[361px]" data-name="h3.MgPEn">
       <Frame2 />
       <Frame3 />
       <Frame4 />
@@ -2180,9 +1882,9 @@ function H3MgPEn() {
           </div>
         </div>
       </div>
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[20.3px] text-right text-white tracking-[-0.66px] w-[46px]">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] ml-[5px] not-italic relative shrink-0 text-[20.3px] text-right text-white tracking-[-0.66px] w-[64px] whitespace-nowrap">
         <p className="leading-[24px]" dir="auto">
-          ویدئو
+          ویدیو
         </p>
       </div>
     </div>
@@ -2214,10 +1916,11 @@ function DivVztd1() {
 }
 
 function Span1() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="span">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#cbced4] text-[14px] tracking-[-0.28px] whitespace-nowrap">
-        <p className="leading-[14px]">{` 11 Videos`}</p>
+        <p className="leading-[14px]">{d ? ` ${d.videos.length} Videos` : ` 4 Videos`}</p>
       </div>
     </div>
   );
@@ -2232,11 +1935,12 @@ function DivPaginationText() {
 }
 
 function ANPLaK7() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#548aff] text-[13.3px] text-right tracking-[-0.28px] w-[173px]">
         <p className="leading-[14px]" dir="auto">
-          میکرو الکترونیک
+          {d?.videos[0]?.category ?? "میکرو الکترونیک"}
         </p>
       </div>
     </div>
@@ -2245,7 +1949,7 @@ function ANPLaK7() {
 
 function DivTedLassoseason4Carditags() {
   return (
-    <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[112.13px] relative shrink-0 w-[205.97px]" data-name="div#TedLassoseason4Carditags">
+    <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[32.15px] relative shrink-0 w-[205.97px]" data-name="div#TedLassoseason4Carditags">
       <ANPLaK7 />
     </div>
   );
@@ -2255,9 +1959,9 @@ function H2TedLassoseason4Cardiheadline() {
   const d = useMobileHome();
   return (
     <div className="h-[48.28px] overflow-clip relative shrink-0 w-full" data-name="h2#TedLassoseason4Cardiheadline">
-      <a className="-translate-x-full -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] h-[49px] justify-center leading-[0] left-[173.82px] not-italic text-[12.9px] text-right text-white top-[23.6px] w-[173.82px]" href={articleUrl(d?.videos[0]?.href ?? null) ?? "#"}>
+      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[12.9px] text-right text-white w-[173.82px]" href={articleUrl(d?.videos[0]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[18.4px]" dir="auto">
-          انقلاب نوری در دنیای تراشه‌ها؛ دانشمندان مسیر حرکت الکترون‌ها را با لیزر کنترل کردند
+          {d?.videos[0]?.title ?? "انقلاب نوری در دنیای تراشه‌ها؛ دانشمندان مسیر حرکت الکترون‌ها را با لیزر کنترل کردند"}
         </p>
       </a>
     </div>
@@ -2294,11 +1998,12 @@ function Frame11() {
 }
 
 function DivBfEpE() {
+  const d = useMobileHome();
   return (
     <div className="bg-[rgba(0,0,0,0.75)] content-stretch flex gap-[2px] items-center justify-center pb-[4.5px] pt-[3.5px] px-[4px] relative rounded-[4px] self-stretch shrink-0" data-name="div.BFEpE">
       <Frame11 />
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-center text-white tracking-[-0.28px] whitespace-nowrap">
-        <p className="leading-[14px]">9:17</p>
+        <p className="leading-[14px]">{d?.videos[0]?.videoDuration ?? "9:17"}</p>
       </div>
     </div>
   );
@@ -2321,13 +2026,18 @@ function DivVztd4() {
 }
 
 function Component260805Abcnlp430VibeCheckHpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="absolute aspect-[152.02999877929688/85.5199966430664] bottom-0 left-0 overflow-clip top-0" data-name="260805_abcnlp_430_vibe_check_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img alt="" className="absolute left-0 max-w-none size-full top-0" src={img260805Abcnlp430VibeCheckHpMain16X9Jpg} />
       </div>
       <div className="absolute h-[86px] left-[0.03px] top-[-0.26px] w-[152px]" data-name="image 4">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgImage4} />
+        {d?.videos[0]?.isUploadedVideo ? (
+          <AutoPlayVideo post={d.videos[0]} />
+        ) : (
+          <img alt={d?.videos[0]?.imageAlt ?? ""} className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={absoluteAsset(d?.videos[0]?.imageUrl) ?? imgImage4} />
+        )}
       </div>
       <DivVztd4 />
     </div>
@@ -2368,11 +2078,12 @@ function DivLiAe6() {
 }
 
 function ANPLaK8() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#548aff] text-[13.3px] text-right tracking-[-0.28px] w-[175px]">
         <p className="leading-[14px]" dir="auto">
-          سلامت و درمان
+          {d?.videos[1]?.category ?? "سلامت و درمان"}
         </p>
       </div>
     </div>
@@ -2381,7 +2092,7 @@ function ANPLaK8() {
 
 function DivDoeslooksmaxxingworktags() {
   return (
-    <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[148.02px] relative shrink-0 w-[205.97px]" data-name="div#Doeslooksmaxxingworktags">
+    <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[31.97px] relative shrink-0 w-[205.97px]" data-name="div#Doeslooksmaxxingworktags">
       <ANPLaK8 />
     </div>
   );
@@ -2390,10 +2101,10 @@ function DivDoeslooksmaxxingworktags() {
 function H2Doeslooksmaxxingworkheadline() {
   const d = useMobileHome();
   return (
-    <div className="h-[32.19px] overflow-clip relative shrink-0 w-full" data-name="h2#Doeslooksmaxxingworkheadline">
-      <a className="-translate-x-full -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] h-[33px] justify-center leading-[0] left-[174px] not-italic text-[13px] text-right text-white top-[15.05px] w-[174px]" href={articleUrl(d?.videos[1]?.href ?? null) ?? "#"}>
+    <div className="h-[37px] overflow-clip relative shrink-0 w-full" data-name="h2#Doeslooksmaxxingworkheadline">
+      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[13px] text-right text-white w-[174px]" href={articleUrl(d?.videos[1]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[18.4px]" dir="auto">
-          از اسکن قرنیه تا شخصی سازی لنز در ۲۰ دقیقه
+          {d?.videos[1]?.title ?? "از اسکن قرنیه تا شخصی سازی لنز در ۲۰ دقیقه"}
         </p>
       </a>
     </div>
@@ -2418,10 +2129,15 @@ function DivQghKv17() {
 }
 
 function Component260805Abcnlp430SpiralHpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="absolute aspect-[152.02999877929688/85.5199966430664] bottom-0 left-0 top-0" data-name="260805_abcnlp_430_spiral_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={img260805Abcnlp430SpiralHpMain16X9Jpg} />
+        {d?.videos[1]?.isUploadedVideo ? (
+          <AutoPlayVideo post={d.videos[1]} />
+        ) : (
+          <img alt={d?.videos[1]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.videos[1]?.imageUrl) ?? img260805Abcnlp430SpiralHpMain16X9Jpg} />
+        )}
       </div>
     </div>
   );
@@ -2440,11 +2156,12 @@ function Frame12() {
 }
 
 function DivBfEpE1() {
+  const d = useMobileHome();
   return (
     <div className="bg-[rgba(0,0,0,0.75)] content-stretch flex gap-[2px] items-center justify-center pb-[4.5px] pt-[3.5px] px-[4px] relative rounded-[4px] self-stretch shrink-0" data-name="div.BFEpE">
       <Frame12 />
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-center text-white tracking-[-0.28px] whitespace-nowrap">
-        <p className="leading-[14px]">9:17</p>
+        <p className="leading-[14px]">{d?.videos[1]?.videoDuration ?? "9:17"}</p>
       </div>
     </div>
   );
@@ -2509,11 +2226,12 @@ function DivLiAe7() {
 }
 
 function ANPLaK9() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#548aff] text-[14px] text-right tracking-[-0.28px] w-[173px]">
         <p className="leading-[14px]" dir="auto">
-          انرژی
+          {d?.videos[2]?.category ?? "انرژی"}
         </p>
       </div>
     </div>
@@ -2522,7 +2240,7 @@ function ANPLaK9() {
 
 function DivYeonjunperformsGguMotags() {
   return (
-    <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[167px] relative shrink-0 w-[205.97px]" data-name="div#YeonjunperformsGGUMotags">
+    <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[31.06px] relative shrink-0 w-[205.97px]" data-name="div#YeonjunperformsGGUMotags">
       <ANPLaK9 />
     </div>
   );
@@ -2531,10 +2249,10 @@ function DivYeonjunperformsGguMotags() {
 function H2YeonjunperformsGguMoheadline() {
   const d = useMobileHome();
   return (
-    <div className="h-[32.19px] overflow-clip relative shrink-0 w-full" data-name="h2#YeonjunperformsGGUMoheadline">
-      <a className="-translate-x-full -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] h-[33px] justify-center leading-[0] left-[174.91px] not-italic text-[13.2px] text-right text-white top-[15.55px] w-[174.91px]" href={articleUrl(d?.videos[2]?.href ?? null) ?? "#"}>
+    <div className="h-[37px] overflow-clip relative shrink-0 w-full" data-name="h2#YeonjunperformsGGUMoheadline">
+      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[13.2px] text-right text-white w-[174.91px]" href={articleUrl(d?.videos[2]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[18.4px]" dir="auto">
-          بازار نرم‌افزارهای مدیریت کربن شتاب گرفت
+          {d?.videos[2]?.title ?? "بازار نرم‌افزارهای مدیریت کربن شتاب گرفت"}
         </p>
       </a>
     </div>
@@ -2559,10 +2277,15 @@ function DivQghKv18() {
 }
 
 function Component260805Gma3Yeonjun1HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
     <div className="absolute aspect-[152.02999877929688/85.5199966430664] bottom-0 left-0 top-0" data-name="260805_gma3_yeonjun1_hpMain_16x9.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={img260805Gma3Yeonjun1HpMain16X9Jpg} />
+        {d?.videos[2]?.isUploadedVideo ? (
+          <AutoPlayVideo post={d.videos[2]} />
+        ) : (
+          <img alt={d?.videos[2]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.videos[2]?.imageUrl) ?? img260805Gma3Yeonjun1HpMain16X9Jpg} />
+        )}
       </div>
     </div>
   );
@@ -2581,11 +2304,12 @@ function Frame13() {
 }
 
 function DivBfEpE2() {
+  const d = useMobileHome();
   return (
     <div className="bg-[rgba(0,0,0,0.75)] content-stretch flex gap-[2px] items-center justify-center pb-[4.5px] pt-[3.5px] px-[4px] relative rounded-[4px] self-stretch shrink-0" data-name="div.BFEpE">
       <Frame13 />
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-center text-white tracking-[-0.28px] whitespace-nowrap">
-        <p className="leading-[14px]">2:56</p>
+        <p className="leading-[14px]">{d?.videos[2]?.videoDuration ?? "2:56"}</p>
       </div>
     </div>
   );
@@ -2920,13 +2644,71 @@ function Div4() {
   );
 }
 
+function BoxVideoRow({ index }: { index: number }) {
+  const d = useMobileHome();
+  const v = d?.videos[index + 1];
+  return (
+    <div className="content-stretch flex items-start gap-[12px] pb-[16px] relative shrink-0 w-full" data-name="div.liAe">
+      <div className="content-stretch flex flex-col items-start pl-[12px] pt-[8px] relative self-stretch shrink-0 w-[209.97px] z-[2]" data-name="div.QGHKv">
+        <div className="content-stretch flex flex-col items-end relative shrink-0 w-full" data-name="div.CJAFL">
+          <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[32.15px] relative shrink-0 w-[205.97px]" data-name="div.tags">
+            <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
+              <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#548aff] text-[13.3px] text-right tracking-[-0.28px] w-[173px]">
+                <p className="leading-[14px]" dir="auto">
+                  {v?.category ?? ""}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="h-[48.28px] overflow-clip relative shrink-0 w-full" data-name="h2.headline">
+            <a
+              className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[12.9px] text-right text-white w-[173.82px]"
+              href={articleUrl(v?.href ?? null) ?? "#"}
+            >
+              <p className="cursor-pointer leading-[18.4px]" dir="auto">
+                {v?.title ?? ""}
+              </p>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div className="max-w-[152.0399932861328px] relative rounded-bl-[6px] rounded-br-[6px] rounded-tl-[6px] self-stretch shrink-0 w-[152.03px] z-[1]" data-name="div.hsDdd">
+        <div className="content-stretch flex flex-col items-start justify-center overflow-clip relative rounded-[6px] shrink-0 w-full" data-name="div.GpQCA">
+          <div className="h-[85.52px] relative shrink-0 w-full" data-name="div.FvQLF">
+            <div className="absolute aspect-[152.02999877929688/85.5199966430664] bottom-0 left-0 overflow-clip top-0" data-name="thumb">
+<div className="absolute h-[86px] left-[0.03px] top-[-0.26px] w-[152px]" data-name="image">
+        {v?.isUploadedVideo ? (
+          <AutoPlayVideo post={v} />
+        ) : (
+          <img alt={v?.imageAlt ?? ""} className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={absoluteAsset(v?.imageUrl) ?? imgImage4} />
+        )}
+      </div>
+              <div className="absolute content-stretch flex inset-[31.27px_76.01px_8.48px_8px] items-end" data-name="div.VZTD">
+                <div className="content-stretch flex items-start relative shrink-0" data-name="div.jrFcb">
+                  <div className="bg-[rgba(0,0,0,0.75)] content-stretch flex gap-[2px] items-center justify-center pb-[4.5px] pt-[3.5px] px-[4px] relative rounded-[4px] self-stretch shrink-0" data-name="div.BFEpE">
+                    <Frame11 />
+                    <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-center text-white tracking-[-0.28px] whitespace-nowrap">
+                      <p className="leading-[14px]">{v?.videoDuration ?? ""}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DivVztd3() {
   return (
-    <div className="h-[304.55px] overflow-clip relative shrink-0 w-full z-[2]" data-name="div.VZTD">
-      <Div1 />
-      <Div2 />
-      <Div3 />
-      <Div4 />
+    <div className="h-[322px] relative shrink-0 w-full z-[2]" data-name="div.VZTD">
+      <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-name="div.list">
+        <BoxVideoRow index={0} />
+        <BoxVideoRow index={1} />
+        <BoxVideoRow index={2} />
+      </div>
     </div>
   );
 }
@@ -3012,16 +2794,20 @@ function Div() {
   return (
     <div className="absolute content-stretch flex flex-col isolate items-start left-0 right-0 top-[374px]" data-name="div">
       <DivVztd3 />
-      <DivPaginationContent />
     </div>
   );
 }
 
 function DivImageWrapper1() {
+  const d = useMobileHome();
   return (
-    <div className="h-[203.63px] relative shrink-0 w-full" data-name="div.Image__Wrapper">
+    <div className="h-[203.63px] relative shrink-0 w-full" data-name="div.Image__Wrapper" onClick={() => { const href = articleUrl(d?.videos[0]?.href ?? null); if (href) window.location.href = href; }}>
       <div className="absolute h-[204px] left-0 top-[0.07px] w-[362px]" data-name="image 2">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgImage2} />
+        {d?.videos[0]?.isUploadedVideo ? (
+          <AutoPlayVideo post={d.videos[0]} />
+        ) : (
+          <img alt={d?.videos[0]?.imageAlt ?? ""} className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={absoluteAsset(d?.videos[0]?.imageUrl) ?? imgImage2} />
+        )}
       </div>
     </div>
   );
@@ -3061,6 +2847,8 @@ function PlayVideo1() {
 }
 
 function DivMediaPlaceholderOverlay1() {
+  const d = useMobileHome();
+  if (d?.videos[0]?.isUploadedVideo) return null;
   return (
     <div className="absolute content-stretch flex inset-0 items-center justify-center" data-name="div.MediaPlaceholder__Overlay">
       <PlayVideo1 />
@@ -3078,11 +2866,12 @@ function Video1() {
 }
 
 function Frame17() {
+  const d = useMobileHome();
   return (
-    <div className="content-stretch flex items-center justify-center relative shrink-0 w-[87px]">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] h-[22px] justify-center leading-[0] not-italic relative shrink-0 text-[#548aff] text-[13.3px] text-right tracking-[-0.24px] w-[572px]">
+    <div className="content-stretch flex items-center justify-center relative shrink-0 w-full">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] h-[18px] justify-center leading-[0] not-italic relative shrink-0 text-[#548aff] text-[13.3px] text-right tracking-[-0.24px] w-full">
         <p className="leading-[18px]" dir="auto">
-          میکرو الکترونیک
+          {d?.videos[0]?.category ?? "میکرو الکترونیک"}
         </p>
       </div>
     </div>
@@ -3099,18 +2888,21 @@ function ANPLaK10() {
 
 function DivTedLassoseason4Carditags1() {
   return (
-    <div className="content-center flex flex-wrap items-center pb-[4px] pl-[8px] pr-[276.16px] relative shrink-0 w-full" data-name="div#TedLassoseason4Carditags">
+    <div className="flex flex-wrap items-center justify-end pb-[4px] pl-[8px] pr-[22px] relative shrink-0 w-full" data-name="div#TedLassoseason4Carditags">
       <ANPLaK10 />
     </div>
   );
 }
 
 function H3TedLassoseason4Cardiheadline() {
+  const d = useMobileHome();
   return (
-    <div className="h-[41.38px] overflow-clip relative shrink-0 w-[362px]" data-name="h3#TedLassoseason4Cardiheadline">
-      <div className="-translate-x-full -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] h-[61px] justify-center leading-[0] left-[327.84px] not-italic text-[16.7px] text-right text-white top-[21.61px] w-[328px]">
+    <div className="h-[51px] overflow-clip relative shrink-0 w-[362px]" data-name="h3#TedLassoseason4Cardiheadline">
+      <div className="-translate-x-full [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] h-[51px] justify-start leading-[0] left-[340px] not-italic text-[16.7px] text-right text-white top-0 w-[328px]">
         <p className="leading-[25.3px]" dir="auto">
-          انقلاب نوری در دنیای تراشه‌ها؛ دانشمندان مسیر حرکت الکترون‌ها را با لیزر کنترل کردند
+          <a className="cursor-pointer" href={articleUrl(d?.videos[0]?.href ?? null) ?? "#"}>
+            {d?.videos[0]?.title ?? "انقلاب نوری در دنیای تراشه‌ها؛ دانشمندان مسیر حرکت الکترون‌ها را با لیزر کنترل کردند"}
+          </a>
         </p>
       </div>
     </div>
@@ -3119,7 +2911,7 @@ function H3TedLassoseason4Cardiheadline() {
 
 function DivCjafl13() {
   return (
-    <div className="content-stretch flex flex-col h-[72px] items-end relative shrink-0" data-name="div.CJAFL">
+    <div className="content-stretch flex flex-col h-[73px] items-end relative shrink-0" data-name="div.CJAFL">
       <DivTedLassoseason4Carditags1 />
       <H3TedLassoseason4Cardiheadline />
     </div>
@@ -3171,9 +2963,10 @@ function DivGerEc1() {
 }
 
 function Component() {
+  const d = useMobileHome();
   return (
-    <div className="h-[436px] relative shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.35)] shrink-0 w-[291px]" data-name="تست">
-      <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img} />
+    <div className="h-[436px] relative bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.35)] shrink-0 w-[291px]" data-name="تست" onClick={() => { const href = articleUrl(d?.magazine[0]?.href ?? null); if (href) window.location.href = href; }}>
+      <img alt={d?.magazine[0]?.imageAlt ?? ""} className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" src={absoluteAsset(d?.magazine[0]?.imageUrl) ?? img} />
     </div>
   );
 }
@@ -3241,7 +3034,7 @@ function H2Text3Xl() {
     <div className="content-stretch flex flex-col items-end relative shrink-0 w-full" data-name="h2.text-3xl" onClick={() => { const href = articleUrl(d?.magazine[0]?.href ?? null); if (href) window.location.href = href; }}>
       <div className="[word-break:break-word] flex flex-col font-['IRANYekanX:Black',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[30px] text-center w-[318px]">
         <p className="leading-[37.5px]" dir="auto">
-          تاب آوری
+          {d?.magazine[0]?.title ?? "تاب آوری"}
         </p>
       </div>
     </div>
@@ -3252,9 +3045,9 @@ function H3FontBold() {
   const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-col items-end relative shrink-0 w-full" data-name="h3.font-bold">
-      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[16px] text-right whitespace-nowrap" href={articleUrl(d?.magazine[1]?.href ?? null) ?? "#"}>
+      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[16px] text-right" href={articleUrl(d?.magazine[1]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[22px]" dir="auto">
-          کشاورزی هوشمند برای تولید بیشتر با منابع کمتر
+          {d?.magazine[1]?.title ?? "کشاورزی هوشمند برای تولید بیشتر با منابع کمتر"}
         </p>
       </a>
     </div>
@@ -3262,11 +3055,13 @@ function H3FontBold() {
 }
 
 function PTextSm() {
+  const d = useMobileHome();
   return (
-    <div className="h-[45.5px] overflow-clip relative shrink-0 w-full" data-name="p.text-sm">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] h-[45px] justify-center leading-[0] not-italic right-[-1px] text-[#52525c] text-[14px] text-right top-[34.29px] w-[293px]">
+    <div className="min-h-[45.5px] relative shrink-0 w-full" data-name="p.text-sm">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] not-italic text-[#52525c] text-[14px] text-right w-full">
         <p className="leading-[22.75px]" dir="auto">
-          گرمایش زمین، افزایش هزینه‌های کشاورزی و کاهش بهره‌وری محصولات، تولید غذا را به یکی از چالش‌های بزرگ جهان تبدیل کرده است
+          {d?.magazine[1]?.lead ??
+            "گرمایش زمین، افزایش هزینه‌های کشاورزی و کاهش بهره‌وری محصولات، تولید غذا را به یکی از چالش‌های بزرگ جهان تبدیل کرده است"}
         </p>
       </div>
     </div>
@@ -3286,9 +3081,9 @@ function H3FontBold1() {
   const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-col items-end relative shrink-0 w-full" data-name="h3.font-bold">
-      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[16px] text-right whitespace-nowrap" href={articleUrl(d?.magazine[2]?.href ?? null) ?? "#"}>
+      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[16px] text-right" href={articleUrl(d?.magazine[2]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[22px]" dir="auto">
-          مدیریت هوشمند آب با کمک هوش مصنوعی
+          {d?.magazine[2]?.title ?? "مدیریت هوشمند آب با کمک هوش مصنوعی"}
         </p>
       </a>
     </div>
@@ -3296,14 +3091,12 @@ function H3FontBold1() {
 }
 
 function PTextSm1() {
+  const d = useMobileHome();
   return (
-    <div className="h-[45.5px] overflow-clip relative shrink-0 w-full" data-name="p.text-sm">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] not-italic right-[-0.17px] text-[#52525c] text-[14px] text-right top-[22.38px] whitespace-nowrap">
-        <p className="leading-[22.75px] mb-0" dir="auto">
-          او مدعی شد می‌تواند بازار فناوری را یک‌پارچه کند؛ اما
-        </p>
+    <div className="min-h-[45.5px] relative shrink-0 w-full" data-name="p.text-sm">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] not-italic text-[#52525c] text-[14px] text-right w-full">
         <p className="leading-[22.75px]" dir="auto">
-          حقیقت پیچیده‌تر بود
+          {d?.magazine[2]?.lead ?? "او مدعی شد می‌تواند بازار فناوری را یک‌پارچه کند؛ اما حقیقت پیچیده‌تر بود"}
         </p>
       </div>
     </div>
@@ -3325,7 +3118,7 @@ function H3FontBold2() {
     <div className="content-stretch flex flex-col items-end relative shrink-0 w-full" data-name="h3.font-bold">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[16px] text-right w-full" href={articleUrl(d?.magazine[3]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[22px]" dir="auto">
-          هوش مصنوعی در خدمت مقابله با تهدیدات زیستی
+          {d?.magazine[3]?.title ?? "هوش مصنوعی در خدمت مقابله با تهدیدات زیستی"}
         </p>
       </a>
     </div>
@@ -3333,14 +3126,12 @@ function H3FontBold2() {
 }
 
 function PTextSm2() {
+  const d = useMobileHome();
   return (
-    <div className="h-[45.5px] overflow-clip relative shrink-0 w-full" data-name="p.text-sm">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] not-italic right-[-0.69px] text-[#52525c] text-[14px] text-right top-[22.38px] whitespace-nowrap">
-        <p className="leading-[22.75px] mb-0" dir="auto">
-          نسل جدیدی از بیمه‌نامه‌های زندگی که ایرانیان را به
-        </p>
+    <div className="min-h-[45.5px] relative shrink-0 w-full" data-name="p.text-sm">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] not-italic text-[#52525c] text-[14px] text-right w-full">
         <p className="leading-[22.75px]" dir="auto">
-          پس‌انداز تشویق می‌کند
+          {d?.magazine[3]?.lead ?? "نسل جدیدی از بیمه‌نامه‌های زندگی که ایرانیان را به پس‌انداز تشویق می‌کند"}
         </p>
       </div>
     </div>
@@ -3360,9 +3151,9 @@ function H3FontBold3() {
   const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-col items-end relative shrink-0 w-full" data-name="h3.font-bold">
-      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[16px] text-right whitespace-nowrap" href={articleUrl(d?.magazine[4]?.href ?? null) ?? "#"}>
+      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[16px] text-right" href={articleUrl(d?.magazine[4]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[22px]" dir="auto">
-          هوش مصنوعی فرآیند توسعه دارو را متحول کرد
+          {d?.magazine[4]?.title ?? "هوش مصنوعی فرآیند توسعه دارو را متحول کرد"}
         </p>
       </a>
     </div>
@@ -3370,11 +3161,12 @@ function H3FontBold3() {
 }
 
 function PTextSm3() {
+  const d = useMobileHome();
   return (
-    <div className="h-[45.5px] overflow-clip relative shrink-0 w-full" data-name="p.text-sm">
-      <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Regular',sans-serif] h-[34px] justify-center leading-[0] not-italic right-[-1px] text-[#52525c] text-[14px] text-right top-[28.29px] w-[311px]">
+    <div className="min-h-[45.5px] relative shrink-0 w-full" data-name="p.text-sm">
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Regular',sans-serif] justify-center leading-[0] not-italic text-[#52525c] text-[14px] text-right w-full">
         <p className="leading-[22.75px]" dir="auto">
-          هوش مصنوعی در حال تغییر روند تحقیق و توسعه دارو است
+          {d?.magazine[4]?.lead ?? "هوش مصنوعی در حال تغییر روند تحقیق و توسعه دارو است"}
         </p>
       </div>
     </div>
@@ -3392,7 +3184,7 @@ function AGroup3() {
 
 function DivGrid1() {
   return (
-    <div className="content-stretch flex flex-col h-[499px] items-start pt-[20px] relative shrink-0 w-full" data-name="div.grid">
+    <div className="content-stretch flex flex-col min-h-[499px] items-start pt-[20px] relative shrink-0 w-full" data-name="div.grid">
       <AGroup />
       <AGroup1 />
       <AGroup2 />
@@ -3424,14 +3216,14 @@ function SpanW() {
 
 function AInlineFlex() {
   return (
-    <div className="content-stretch flex gap-[10px] items-center pt-[12px] relative shrink-0" data-name="a.inline-flex">
+    <a className="content-stretch flex gap-[10px] items-center no-underline pt-[12px] relative shrink-0" data-name="a.inline-flex" href={`${API_URL}/category/magazine`}>
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] h-[28px] justify-center leading-[0] not-italic relative shrink-0 text-[#09090b] text-[14px] text-right w-[118px]">
         <p className="leading-[20px]" dir="auto">
           بیشتر بخوانید
         </p>
       </div>
       <SpanW />
-    </div>
+    </a>
   );
 }
 
@@ -3465,7 +3257,7 @@ function DivPx() {
 
 function SectionBgWhite() {
   return (
-    <div className="bg-white border-[#e4e4e7] border-b border-solid content-stretch flex flex-col h-[1145.73px] items-start px-[16px] py-[32px] relative shrink-0 w-[390px]" data-name="section.bg-white">
+    <div className="bg-white border-[#e4e4e7] border-b border-solid content-stretch flex flex-col min-h-[1145.73px] items-start px-[16px] py-[32px] relative shrink-0 w-[390px]" data-name="section.bg-white">
       <DivPx />
     </div>
   );
@@ -3602,23 +3394,18 @@ function DivVztd10() {
 }
 
 function ElSayed11ApGmh2608051785943198676HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
-    <div className="absolute aspect-[362/203.6300048828125] bottom-0 left-0 top-0" data-name="El-Sayed-11-ap-gmh-260805_1785943198676_hpMain_16x9.jpg">
+    <div className="absolute aspect-[362/203.6300048828125] bottom-0 left-0 top-0" data-name="El-Sayed-11-ap-gmh-260805_1785943198676_hpMain_16x9.jpg" onClick={() => { const href = articleUrl(d?.digital[0]?.href ?? null); if (href) window.location.href = href; }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgElSayed11ApGmh2608051785943198676HpMain16X9Jpg} />
+        <img alt={d?.digital[0]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.digital[0]?.imageUrl) ?? imgElSayed11ApGmh2608051785943198676HpMain16X9Jpg} />
       </div>
     </div>
   );
 }
 
 function DivCCqLx() {
-  return (
-    <div className="bg-[rgba(0,0,0,0.3)] content-stretch flex flex-col items-start p-[2px] relative rounded-[2px] self-stretch shrink-0" data-name="div.CCqLx">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[9.1px] text-[rgba(255,255,255,0.8)] tracking-[-0.3px] whitespace-nowrap">
-        <p className="leading-[12px]">Julia Demaree Nikhinson/AP Photo</p>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function DivJrFcb3() {
@@ -3663,11 +3450,12 @@ function PrimariesTakeawaysProgressivesScoreBigWinsAndTurnToNovember() {
 }
 
 function ANPLaK11() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[13.5px] text-right tracking-[-0.28px] w-[361px]">
         <p className="leading-[14px]" dir="auto">
-          تماس تبلیغاتی ناخواسته در فرانسه ممنوع شد
+          {d?.digital[0]?.category ?? "تماس تبلیغاتی ناخواسته در فرانسه ممنوع شد"}
         </p>
       </div>
     </div>
@@ -3688,7 +3476,8 @@ function H2PrimariestakeawaysPrheadline() {
     <div className="content-stretch flex flex-col items-start overflow-clip relative shrink-0 w-full" data-name="h2#PrimariestakeawaysPrheadline" onClick={() => { const href = articleUrl(d?.digital[0]?.href ?? null); if (href) window.location.href = href; }}>
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[16.6px] text-right w-full">
         <p className="leading-[22px]" dir="auto">
-          در فرانسه، تماس‌های تلفنی بی‌وقفه برای تبلیغ پنل‌های خورشیدی، سقف‌ها، پمپ‌های حرارتی و سایر اقلام از روز سه‌شنبه ۱۱ اوت با اجرای قانون ممنوعیت تماس‌های تلفنی ناخواسته، ممنوع خواهد شد
+          {d?.digital[0]?.title ??
+            "در فرانسه، تماس‌های تلفنی بی‌وقفه برای تبلیغ پنل‌های خورشیدی، سقف‌ها، پمپ‌های حرارتی و سایر اقلام از روز سه‌شنبه ۱۱ اوت با اجرای قانون ممنوعیت تماس‌های تلفنی ناخواسته، ممنوع خواهد شد"}
         </p>
       </div>
     </div>
@@ -3714,11 +3503,12 @@ function DivLiAe18() {
 }
 
 function ANPLaK12() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0 w-[185px]" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[13.5px] text-right tracking-[-0.28px] w-[185px]">
         <p className="leading-[14px]" dir="auto">
-          اقتصاد دیجیتال
+          {d?.digital[1]?.category ?? "اقتصاد دیجیتال"}
         </p>
       </div>
     </div>
@@ -3736,10 +3526,10 @@ function DivElSayedwoncrucialMictags() {
 function H2ElSayedwoncrucialMicheadline() {
   const d = useMobileHome();
   return (
-    <div className="h-full overflow-clip relative shrink-0 w-[197.97px]" data-name="h2#ElSayedwoncrucialMicheadline" onClick={() => { const href = articleUrl(d?.digital[1]?.href ?? null); if (href) window.location.href = href; }}>
-      <div className="-translate-x-full -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] left-[183px] not-italic text-[#141618] text-[13px] text-right top-[23.35px] w-[183px]">
+    <div className="min-h-[48.28px] flex flex-col items-start relative shrink-0 w-full" data-name="h2#ElSayedwoncrucialMicheadline" onClick={() => { const href = articleUrl(d?.digital[1]?.href ?? null); if (href) window.location.href = href; }}>
+      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right w-[183px]">
         <p className="leading-[16.1px]" dir="auto">
-          حمله سایبری گسترده علیه بخش‌های هوانوردی، انرژی و آموزش امارات
+          {d?.digital[1]?.title ?? "حمله سایبری گسترده علیه بخش‌های هوانوردی، انرژی و آموزش امارات"}
         </p>
       </div>
     </div>
@@ -3748,7 +3538,7 @@ function H2ElSayedwoncrucialMicheadline() {
 
 function AZZygg6() {
   return (
-    <div className="content-stretch flex h-[48.28px] items-start relative shrink-0 w-full" data-name="a.zZygg">
+    <div className="content-stretch flex min-h-[48.28px] items-start relative shrink-0 w-full" data-name="a.zZygg">
       <H2ElSayedwoncrucialMicheadline />
     </div>
   );
@@ -3780,10 +3570,11 @@ function DivQghKvMargin1() {
 }
 
 function ElSayed10ApGmh2608051785943199095HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
-    <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="El-Sayed-10-ap-gmh-260805_1785943199095_hpMain_16x9.jpg">
+    <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="El-Sayed-10-ap-gmh-260805_1785943199095_hpMain_16x9.jpg" onClick={() => { const href = articleUrl(d?.digital[1]?.href ?? null); if (href) window.location.href = href; }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgElSayed10ApGmh2608051785943199095HpMain16X9Jpg} />
+        <img alt={d?.digital[1]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.digital[1]?.imageUrl) ?? imgElSayed10ApGmh2608051785943199095HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -3831,11 +3622,12 @@ function LiPcCvU() {
 }
 
 function ANPLaK13() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[13.5px] text-right tracking-[-0.28px] w-[184px]">
         <p className="leading-[14px]" dir="auto">
-          اقتصاد دیجیتال
+          {d?.digital[2]?.category ?? "اقتصاد دیجیتال"}
         </p>
       </div>
     </div>
@@ -3853,10 +3645,10 @@ function DivElSayedprojectedtowitags() {
 function H2ElSayedprojectedtowiheadline() {
   const d = useMobileHome();
   return (
-    <div className="h-full overflow-clip relative shrink-0 w-[197.97px]" data-name="h2#ElSayedprojectedtowiheadline">
-      <a className="-translate-x-full -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] left-[183px] not-italic text-[#141618] text-[13px] text-right top-[23.83px] w-[183px]" href={articleUrl(d?.digital[2]?.href ?? null) ?? "#"}>
+    <div className="min-h-[48.28px] flex flex-col items-start relative shrink-0 w-full" data-name="h2#ElSayedprojectedtowiheadline">
+      <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic text-[#141618] text-[13px] text-right w-[183px]" href={articleUrl(d?.digital[2]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[16.1px]" dir="auto">
-          توسعه کشور در شرایط جنگی متوقف نشد/کاهش زمان ‌پاسخگویی به مردم
+          {d?.digital[2]?.title ?? "توسعه کشور در شرایط جنگی متوقف نشد/کاهش زمان ‌پاسخگویی به مردم"}
         </p>
       </a>
     </div>
@@ -3865,7 +3657,7 @@ function H2ElSayedprojectedtowiheadline() {
 
 function AZZygg7() {
   return (
-    <div className="content-stretch flex h-[48.28px] items-start relative shrink-0 w-full" data-name="a.zZygg">
+    <div className="content-stretch flex min-h-[48.28px] items-start relative shrink-0 w-full" data-name="a.zZygg">
       <H2ElSayedprojectedtowiheadline />
     </div>
   );
@@ -3897,10 +3689,11 @@ function DivQghKvMargin2() {
 }
 
 function ElSayed7ApGmh2608051785942592371HpMain16X9Jpg() {
+  const d = useMobileHome();
   return (
-    <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="El-Sayed-7-ap-gmh-260805_1785942592371_hpMain_16x9.jpg">
+    <div className="h-[85.52px] relative shrink-0 w-[152.03px]" data-name="El-Sayed-7-ap-gmh-260805_1785942592371_hpMain_16x9.jpg" onClick={() => { const href = articleUrl(d?.digital[2]?.href ?? null); if (href) window.location.href = href; }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgElSayed7ApGmh2608051785942592371HpMain16X9Jpg} />
+        <img alt={d?.digital[2]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.digital[2]?.imageUrl) ?? imgElSayed7ApGmh2608051785942592371HpMain16X9Jpg} />
       </div>
     </div>
   );
@@ -3975,7 +3768,7 @@ function DivSXarj() {
 
 function DivGerEc2() {
   return (
-    <div className="content-stretch flex flex-col h-[683px] items-start pb-[16px] pt-[66px] px-[14px] relative shrink-0 w-full" data-name="div.GerEc">
+    <div className="content-stretch flex flex-col min-h-[683px] items-start pb-[16px] pt-[66px] px-[14px] relative shrink-0 w-full" data-name="div.GerEc">
       <DivVztd10 />
       <DivSXarj />
     </div>
@@ -4007,12 +3800,22 @@ function DivGpQca11() {
 }
 
 function DivLiAe21() {
+  const d = useMobileHome();
+  const ad = d?.sections?.["ad-1"]?.[0] ?? null;
   return (
     <div className="bg-[#000e2c] content-stretch flex flex-col h-[318px] isolate items-center pb-[16px] relative rounded-[6px] shrink-0 w-[362px]" data-name="div.liAe">
       <div className="[word-break:break-word] flex flex-col font-['Inknut_Antiqua:Bold',sans-serif] h-[57px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white tracking-[-0.72px] w-full z-[2]">
         <p className="leading-[27.6px] whitespace-pre-wrap" dir="auto">{`    ADVERTISE`}</p>
       </div>
-      <DivGpQca11 />
+      <div className="h-[297px] overflow-clip relative rounded-tl-[6px] rounded-tr-[6px] shrink-0 w-full z-[1]" data-name="div.GpQCA">
+        <a className="block h-full w-full" href={articleUrl(ad?.href ?? null) ?? "#"}>
+          {ad && absoluteAsset(ad.imageUrl) ? (
+            <img alt={ad.imageAlt} className="absolute inset-0 max-w-none object-cover size-full" src={absoluteAsset(ad.imageUrl)} />
+          ) : (
+            <DivFvQlf12 />
+          )}
+        </a>
+      </div>
     </div>
   );
 }
@@ -4109,10 +3912,39 @@ function DivQghKv29() {
 }
 
 function DivLiAe22() {
+  const d = useMobileHome();
+  const ad = d?.sections?.["ad-2"]?.[0] ?? null;
   return (
     <div className="bg-[#000e2c] content-stretch flex flex-col isolate items-center pt-[16px] relative shrink-0 w-full" data-name="div.liAe">
-      <DancingWithTheStarsTheNextProSendsHome2DancersAfterChemistryChallenge />
-      <DivQghKv29 />
+      <a className="block w-full" href={articleUrl(ad?.href ?? null) ?? "#"}>
+        {ad && absoluteAsset(ad.imageUrl) ? (
+          <div className="h-[219.38px] relative shrink-0 w-full" data-name="div.FvQLF">
+            <img alt={ad.imageAlt} className="absolute inset-0 max-w-none object-cover size-full" src={absoluteAsset(ad.imageUrl)} />
+          </div>
+        ) : (
+          <DancingWithTheStarsTheNextProSendsHome2DancersAfterChemistryChallenge />
+        )}
+        {ad ? (
+          <div className="content-stretch flex flex-col items-start justify-center pb-[56px] pt-[40px] px-[18px] relative shrink-0 w-[390px] z-[1]" data-name="div.QGHKv">
+            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="div.CJAFL">
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="a.zZygg">
+                <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center relative shrink-0 w-full not-italic text-[12px] text-center text-white tracking-[-0.72px]" data-name="h2#DancingWiththeStarsTheadline">
+                  <p className="leading-[27.6px]" dir="auto">{ad.title}</p>
+                </div>
+                {ad.lead && (
+                  <div className="content-stretch flex flex-col items-start pt-[8px] relative shrink-0 w-full" data-name="p#DancingWiththeStarsTbody:margin">
+                    <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center relative shrink-0 w-full not-italic text-[#cbced4] text-[14.3px] text-center" data-name="p#DancingWiththeStarsTbody">
+                      <p className="leading-[18.4px]">{ad.lead}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <DivQghKv29 />
+        )}
+      </a>
     </div>
   );
 }
@@ -4130,11 +3962,12 @@ function H3MgPEn2() {
 }
 
 function ANPLaK14() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0 w-[231px]" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[234px]">
         <p className="leading-[14px]" dir="auto">
-          اقتصاد دیجیتال
+          {d?.latestList[0]?.category ?? "اقتصاد دیجیتال"}
         </p>
       </div>
     </div>
@@ -4155,7 +3988,7 @@ function H213Yearoldboybehindwhheadline() {
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[15.62px] relative self-stretch" data-name="h2#13yearoldboybehindwhheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[13px] text-right w-full" href={articleUrl(d?.latestList[0]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[20px]" dir="auto">
-          قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران
+          {d?.latestList[0]?.title ?? "قدرت‌بنیان؛ پارادایم تازه برای حکمرانی فناوری ایران"}
         </p>
       </a>
     </div>
@@ -4188,10 +4021,11 @@ function DivQghKv30() {
 }
 
 function MdCrash1HtGmh2608051785961626040HpMainSquareJpg() {
+  const d = useMobileHome();
   return (
     <div className="relative shrink-0 size-[101.75px]" data-name="md-crash-1-ht-gmh-260805_1785961626040_hpMain_square.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgMdCrash1HtGmh2608051785961626040HpMainSquareJpg} />
+        <img alt={d?.latestList[0]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.latestList[0]?.imageUrl) ?? imgMdCrash1HtGmh2608051785961626040HpMainSquareJpg} />
       </div>
     </div>
   );
@@ -4231,11 +4065,12 @@ function DivLiAe23() {
 }
 
 function ANPLaK15() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0 w-[229px]" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[234px]">
         <p className="leading-[14px]" dir="auto">
-          اقتصاد دیجیتال
+          {d?.latestList[1]?.category ?? "اقتصاد دیجیتال"}
         </p>
       </div>
     </div>
@@ -4256,7 +4091,7 @@ function H2InsideTrumpscontentiheadline1() {
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[14.11px] relative self-stretch" data-name="h2#InsideTrumpscontentiheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[12.9px] text-right w-full" href={articleUrl(d?.latestList[1]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[20px]" dir="auto">
-          بانک توسعه فناوری و ابزارهای نوین مالی؛ بسته جدید صندوق برای زیست‌بوم نوآوری
+          {d?.latestList[1]?.title ?? "بانک توسعه فناوری و ابزارهای نوین مالی؛ بسته جدید صندوق برای زیست‌بوم نوآوری"}
         </p>
       </a>
     </div>
@@ -4289,10 +4124,11 @@ function DivQghKv31() {
 }
 
 function Pirro1GtyGmh2608031785790335622HpMainSquareJpg() {
+  const d = useMobileHome();
   return (
     <div className="relative shrink-0 size-[101.75px]" data-name="pirro-1-gty-gmh-260803_1785790335622_hpMain_square.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgPirro1GtyGmh2608031785790335622HpMainSquareJpg} />
+        <img alt={d?.latestList[1]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.latestList[1]?.imageUrl) ?? imgPirro1GtyGmh2608031785790335622HpMainSquareJpg} />
       </div>
     </div>
   );
@@ -4332,11 +4168,12 @@ function DivLiAe24() {
 }
 
 function ANPLaK16() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0 w-[226px]" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[13.9px] text-right tracking-[-0.28px] w-[234px]">
         <p className="leading-[14px]" dir="auto">
-          سلامت و درمان
+          {d?.latestList[2]?.category ?? "سلامت و درمان"}
         </p>
       </div>
     </div>
@@ -4357,8 +4194,9 @@ function H2FdAapprovesModernasmheadline1() {
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[0.59px] relative self-stretch" data-name="h2#FDAapprovesModernasmheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[13px] text-right tracking-[-0.42px] w-[234px]" href={articleUrl(d?.latestList[2]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer" dir="auto">
-          <span className="leading-[20px] tracking-[-0.42px]">سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسا</span>
-          <span className="leading-[20px]">ن</span>
+          <span className="leading-[20px] tracking-[-0.42px]">
+            {d?.latestList[2]?.title ?? "سرم آزمایشی بازسازی اندام؛ گامی بزرگ برای بازسازی اندام های انسان"}
+          </span>
         </p>
       </a>
     </div>
@@ -4391,10 +4229,11 @@ function DivQghKv32() {
 }
 
 function ModernaHqApJt2608041785874475703HpMainSquareJpg() {
+  const d = useMobileHome();
   return (
     <div className="relative shrink-0 size-[101.75px]" data-name="moderna-hq-ap-jt-260804_1785874475703_hpMain_square.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgModernaHqApJt2608041785874475703HpMainSquareJpg} />
+        <img alt={d?.latestList[2]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.latestList[2]?.imageUrl) ?? imgModernaHqApJt2608041785874475703HpMainSquareJpg} />
       </div>
     </div>
   );
@@ -4434,11 +4273,12 @@ function DivLiAe25() {
 }
 
 function ANPLaK17() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[13.9px] text-right tracking-[-0.28px] w-[234px]">
         <p className="leading-[14px]" dir="auto">
-          سلامت و درمان
+          {d?.latestList[3]?.category ?? "سلامت و درمان"}
         </p>
       </div>
     </div>
@@ -4459,7 +4299,7 @@ function H2Casesofpotentiallydeheadline() {
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[34.08px] relative self-stretch" data-name="h2#Casesofpotentiallydeheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[13px] text-right w-[234px]" href={articleUrl(d?.latestList[3]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[20px]" dir="auto">
-          نسخه آزمایشگاهی مغز، امید تازه‌ای برای بیماران مبتلا به آلزایمر
+          {d?.latestList[3]?.title ?? "نسخه آزمایشگاهی مغز، امید تازه‌ای برای بیماران مبتلا به آلزایمر"}
         </p>
       </a>
     </div>
@@ -4492,10 +4332,11 @@ function DivQghKv33() {
 }
 
 function CandidaAurisGtyJef2608051785935833866HpMainSquareJpg() {
+  const d = useMobileHome();
   return (
     <div className="relative shrink-0 size-[101.75px]" data-name="candida-auris-gty-jef-260805_1785935833866_hpMain_square.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgCandidaAurisGtyJef2608051785935833866HpMainSquareJpg} />
+        <img alt={d?.latestList[3]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.latestList[3]?.imageUrl) ?? imgCandidaAurisGtyJef2608051785935833866HpMainSquareJpg} />
       </div>
     </div>
   );
@@ -4535,11 +4376,12 @@ function DivLiAe26() {
 }
 
 function ANPLaK18() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[234px]">
         <p className="leading-[14px]" dir="auto">
-          انرژی‌
+          {d?.latestList[4]?.category ?? "انرژی‌"}
         </p>
       </div>
     </div>
@@ -4560,7 +4402,7 @@ function H2Federalofficialsconfheadline1() {
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[27.92px] relative self-stretch" data-name="h2#Federalofficialsconfheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[12.9px] text-right w-[234px]" href={articleUrl(d?.latestList[4]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[20px]" dir="auto">
-          نسل جدید عملیات مبتنی بر هوش مصنوعی در صنعت نفت و گاز
+          {d?.latestList[4]?.title ?? "نسل جدید عملیات مبتنی بر هوش مصنوعی در صنعت نفت و گاز"}
         </p>
       </a>
     </div>
@@ -4593,10 +4435,11 @@ function DivQghKv34() {
 }
 
 function MarineOneTrumpGtyBh2608051785956524669HpMainSquareJpg() {
+  const d = useMobileHome();
   return (
     <div className="relative shrink-0 size-[101.75px]" data-name="Marine-one-trump-gty-bh-260805_1785956524669_hpMain_square.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgMarineOneTrumpGtyBh2608051785956524669HpMainSquareJpg} />
+        <img alt={d?.latestList[4]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.latestList[4]?.imageUrl) ?? imgMarineOneTrumpGtyBh2608051785956524669HpMainSquareJpg} />
       </div>
     </div>
   );
@@ -4636,11 +4479,12 @@ function DivLiAe27() {
 }
 
 function ANPLaK19() {
+  const d = useMobileHome();
   return (
     <div className="content-stretch flex items-start relative shrink-0" data-name="a.nPLaK">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#990108] text-[14px] text-right tracking-[-0.28px] w-[234px]">
         <p className="leading-[14px]" dir="auto">
-          انرژی
+          {d?.latestList[5]?.category ?? "انرژی"}
         </p>
       </div>
     </div>
@@ -4661,7 +4505,7 @@ function H2USsuspendsavocadoinsheadline() {
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip pr-[2.06px] relative self-stretch" data-name="h2#USsuspendsavocadoinsheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#141618] text-[12.9px] text-right w-[234px]" href={articleUrl(d?.latestList[5]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[20px]" dir="auto">
-          بالکن‌ها به نیروگاه‌های کوچک خورشیدی تبدیل می‌شوند
+          {d?.latestList[5]?.title ?? "بالکن‌ها به نیروگاه‌های کوچک خورشیدی تبدیل می‌شوند"}
         </p>
       </a>
     </div>
@@ -4694,10 +4538,11 @@ function DivQghKv35() {
 }
 
 function WirestoryC5Cf0Ef4A260E6A517Fae615C08A1F8BSquareJpg() {
+  const d = useMobileHome();
   return (
     <div className="relative shrink-0 size-[101.75px]" data-name="wirestory_c5cf0ef4a260e6a517fae615c08a1f8b_square.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgWirestoryC5Cf0Ef4A260E6A517Fae615C08A1F8BSquareJpg} />
+        <img alt={d?.latestList[5]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.latestList[5]?.imageUrl) ?? imgWirestoryC5Cf0Ef4A260E6A517Fae615C08A1F8BSquareJpg} />
       </div>
     </div>
   );
@@ -4834,7 +4679,7 @@ function ButtonMLash1() {
 
 function DivGerEc4() {
   return (
-    <div className="bg-[#f4f5f6] content-stretch flex flex-col h-[847px] items-start pb-[32px] pt-[24px] px-[14px] relative shrink-0 w-full" data-name="div.GerEc">
+    <div className="bg-[#f4f5f6] content-stretch flex flex-col min-h-[847px] items-start pb-[32px] pt-[24px] px-[14px] relative shrink-0 w-full" data-name="div.GerEc">
       <DivVztd12 />
       <ButtonMLash />
       <ButtonMLash1 />
@@ -4898,22 +4743,16 @@ function HeaderVztd() {
 function Fire2ApGmh2608051785938141032HpEmbedSl16X9TJpg() {
   const d = useMobileHome();
   return (
-    <div className="absolute aspect-[362.0028381347656/203.9541778564453] bottom-[-0.33px] left-0 top-0" data-name="fire-2-ap-gmh-260805_1785938141032_hpEmbed_sl_16x9t.jpg" onClick={() => { const href = articleUrl(d?.photos[0]?.href ?? null); if (href) window.location.href = href; }}>
+    <div className="absolute aspect-[362.0028381347656/203.9541778564453] bottom-[-0.33px] left-0 top-0" data-name="fire-2-ap-gmh-260805_1785938141032_hpEmbed_sl_16x9t.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgFire2ApGmh2608051785938141032HpEmbedSl16X9TJpg} />
+        <img alt={d?.photos[0]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.photos[0]?.imageUrl) ?? imgFire2ApGmh2608051785938141032HpEmbedSl16X9TJpg} />
       </div>
     </div>
   );
 }
 
 function DivCCqLx1() {
-  return (
-    <div className="bg-[rgba(0,0,0,0.3)] content-stretch flex flex-col items-center p-[2px] relative rounded-[2px] self-stretch shrink-0" data-name="div.CCqLx">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[9.2px] text-[rgba(255,255,255,0.8)] text-center tracking-[-0.3px] whitespace-nowrap">
-        <p className="leading-[12px]">Noah Berger/AP Photo</p>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function DivJrFcb4() {
@@ -4941,11 +4780,12 @@ function DivNullbodyRichContentindicators() {
 }
 
 function DivFvQlf20() {
+  const d = useMobileHome();
   return (
-    <div className="h-[203.622px] relative shrink-0 w-full" data-name="div.FvQLF">
+    <a className="block h-[203.622px] relative shrink-0 w-full" data-name="div.FvQLF" href={articleUrl(d?.photos[0]?.href ?? null) ?? "#"}>
       <Fire2ApGmh2608051785938141032HpEmbedSl16X9TJpg />
       <DivNullbodyRichContentindicators />
-    </div>
+    </a>
   );
 }
 
@@ -4965,37 +4805,19 @@ function Div7() {
   );
 }
 
-function DivSwiperSlide() {
-  return (
-    <div className="absolute bottom-[-4.19px] flex items-center justify-center left-[-12.41px] max-w-[361.9999694824219px] min-w-[361.9999694824219px] top-[-4.2px] w-[386.815px]" style={{ containerType: "size" }}>
-      <div className="flex-none h-[hypot(-7.32608cqw,80.0092cqh)] rotate-8 w-[hypot(92.6739cqw,19.9908cqh)]">
-        <div className="content-stretch flex items-center justify-center opacity-0 relative size-full" data-name="div.SwiperSlide">
-          <Div7 />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Fire4ApGmh2608051785938141886HpEmbedSl16X9TJpg() {
   const d = useMobileHome();
   return (
-    <div className="absolute aspect-[362.0031433105469/203.94741821289062] bottom-[-0.32px] left-0 top-0" data-name="fire-4-ap-gmh-260805_1785938141886_hpEmbed_sl_16x9t.jpg" onClick={() => { const href = articleUrl(d?.photos[1]?.href ?? null); if (href) window.location.href = href; }}>
+    <div className="absolute aspect-[362.0031433105469/203.94741821289062] bottom-[-0.32px] left-0 top-0" data-name="fire-4-ap-gmh-260805_1785938141886_hpEmbed_sl_16x9t.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute h-[100.01%] left-0 max-w-none top-0 w-full" src={imgFire4ApGmh2608051785938141886HpEmbedSl16X9TJpg} />
+        <img alt={d?.photos[1]?.imageAlt ?? ""} className="absolute h-[100.01%] left-0 max-w-none top-0 w-full object-cover" src={absoluteAsset(d?.photos[1]?.imageUrl) ?? imgFire4ApGmh2608051785938141886HpEmbedSl16X9TJpg} />
       </div>
     </div>
   );
 }
 
 function DivCCqLx2() {
-  return (
-    <div className="bg-[rgba(0,0,0,0.3)] content-stretch flex flex-col items-center pb-[2.001px] pt-[0.998px] px-[2px] relative rounded-[2px] self-stretch shrink-0" data-name="div.CCqLx">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[9.2px] text-[rgba(255,255,255,0.8)] text-center tracking-[-0.3px] whitespace-nowrap">
-        <p className="leading-[12px]">Noah Berger/AP</p>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function DivJrFcb5() {
@@ -5023,11 +4845,12 @@ function DivNullbodyRichContentindicators1() {
 }
 
 function DivFvQlf21() {
+  const d = useMobileHome();
   return (
-    <div className="h-[203.625px] relative shrink-0 w-full" data-name="div.FvQLF">
+    <a className="block h-[203.625px] relative shrink-0 w-full" data-name="div.FvQLF" href={articleUrl(d?.photos[1]?.href ?? null) ?? "#"}>
       <Fire4ApGmh2608051785938141886HpEmbedSl16X9TJpg />
       <DivNullbodyRichContentindicators1 />
-    </div>
+    </a>
   );
 }
 
@@ -5047,37 +4870,19 @@ function Div8() {
   );
 }
 
-function DivSwiperSlide1() {
-  return (
-    <div className="absolute bottom-[1.64px] flex items-center justify-center left-[-9.66px] max-w-[362.0000305175781px] min-w-[362.0000305175781px] top-[1.64px] w-[381.302px]" style={{ containerType: "size" }}>
-      <div className="flex-none h-[hypot(-5.5822cqw,84.2569cqh)] rotate-6 w-[hypot(94.4178cqw,15.7431cqh)]">
-        <div className="content-stretch flex items-center justify-center opacity-0 relative size-full" data-name="div.SwiperSlide">
-          <Div8 />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Fire5GtyGmh2608051785938142332HpEmbedSl16X9TJpg() {
   const d = useMobileHome();
   return (
-    <div className="absolute aspect-[362.0016784667969/203.95631408691406] bottom-[-0.33px] left-0 top-0" data-name="fire-5-gty-gmh-260805_1785938142332_hpEmbed_sl_16x9t.jpg" onClick={() => { const href = articleUrl(d?.photos[2]?.href ?? null); if (href) window.location.href = href; }}>
+    <div className="absolute aspect-[362.0016784667969/203.95631408691406] bottom-[-0.33px] left-0 top-0" data-name="fire-5-gty-gmh-260805_1785938142332_hpEmbed_sl_16x9t.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgFire5GtyGmh2608051785938142332HpEmbedSl16X9TJpg} />
+        <img alt={d?.photos[2]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.photos[2]?.imageUrl) ?? imgFire5GtyGmh2608051785938142332HpEmbedSl16X9TJpg} />
       </div>
     </div>
   );
 }
 
 function DivCCqLx3() {
-  return (
-    <div className="bg-[rgba(0,0,0,0.3)] content-stretch flex flex-col items-center p-[2px] relative rounded-[2px] self-stretch shrink-0" data-name="div.CCqLx">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[8.9px] text-[rgba(255,255,255,0.8)] text-center tracking-[-0.3px] whitespace-nowrap">
-        <p className="leading-[12px]">Josh Edelson/AFP via Getty Images</p>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function DivJrFcb6() {
@@ -5105,11 +4910,12 @@ function DivNullbodyRichContentindicators2() {
 }
 
 function DivFvQlf22() {
+  const d = useMobileHome();
   return (
-    <div className="h-[203.626px] relative shrink-0 w-full" data-name="div.FvQLF">
+    <a className="block h-[203.626px] relative shrink-0 w-full" data-name="div.FvQLF" href={articleUrl(d?.photos[2]?.href ?? null) ?? "#"}>
       <Fire5GtyGmh2608051785938142332HpEmbedSl16X9TJpg />
       <DivNullbodyRichContentindicators2 />
-    </div>
+    </a>
   );
 }
 
@@ -5129,37 +4935,19 @@ function Div9() {
   );
 }
 
-function DivSwiperSlide2() {
-  return (
-    <div className="absolute bottom-[7.63px] flex items-center justify-center left-[-6.66px] max-w-[361.9999694824219px] min-w-[361.9999694824219px] top-[7.62px] w-[375.322px]" style={{ containerType: "size" }}>
-      <div className="flex-none h-[hypot(-3.78444cqw,88.9429cqh)] rotate-4 w-[hypot(96.2156cqw,11.0571cqh)]">
-        <div className="content-stretch flex items-center justify-center opacity-0 relative size-full" data-name="div.SwiperSlide">
-          <Div9 />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Fire1ApGmh2608051785938141462HpEmbedSl16X9TJpg() {
   const d = useMobileHome();
   return (
-    <div className="absolute aspect-[362.000732421875/203.95396423339844] bottom-[-0.33px] left-0 top-0" data-name="fire-1-ap-gmh-260805_1785938141462_hpEmbed_sl_16x9t.jpg" onClick={() => { const href = articleUrl(d?.photos[3]?.href ?? null); if (href) window.location.href = href; }}>
+    <div className="absolute aspect-[362.000732421875/203.95396423339844] bottom-[-0.33px] left-0 top-0" data-name="fire-1-ap-gmh-260805_1785938141462_hpEmbed_sl_16x9t.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgFire1ApGmh2608051785938141462HpEmbedSl16X9TJpg} />
+        <img alt={d?.photos[3]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.photos[3]?.imageUrl) ?? imgFire1ApGmh2608051785938141462HpEmbedSl16X9TJpg} />
       </div>
     </div>
   );
 }
 
 function DivCCqLx4() {
-  return (
-    <div className="bg-[rgba(0,0,0,0.3)] content-stretch flex flex-col items-center pb-[2px] pt-px px-[2px] relative rounded-[2px] self-stretch shrink-0" data-name="div.CCqLx">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[9.2px] text-[rgba(255,255,255,0.8)] text-center tracking-[-0.3px] whitespace-nowrap">
-        <p className="leading-[12px]">Noah Berger/AP</p>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function DivJrFcb7() {
@@ -5187,11 +4975,12 @@ function DivNullbodyRichContentindicators3() {
 }
 
 function DivFvQlf23() {
+  const d = useMobileHome();
   return (
-    <div className="h-[203.624px] relative shrink-0 w-full" data-name="div.FvQLF">
+    <a className="block h-[203.624px] relative shrink-0 w-full" data-name="div.FvQLF" href={articleUrl(d?.photos[3]?.href ?? null) ?? "#"}>
       <Fire1ApGmh2608051785938141462HpEmbedSl16X9TJpg />
       <DivNullbodyRichContentindicators3 />
-    </div>
+    </a>
   );
 }
 
@@ -5211,37 +5000,19 @@ function Div10() {
   );
 }
 
-function DivSwiperSlide3() {
-  return (
-    <div className="absolute bottom-[13.75px] flex items-center justify-center left-[-3.45px] max-w-[362.00006103515625px] min-w-[362.00006103515625px] top-[13.74px] w-[368.886px]" style={{ containerType: "size" }}>
-      <div className="flex-none h-[hypot(-1.9265cqw,94.1549cqh)] rotate-2 w-[hypot(98.0735cqw,5.84512cqh)]">
-        <div className="content-stretch flex items-center justify-center relative size-full" data-name="div.SwiperSlide">
-          <Div10 />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Fire3GtyGmh2608051785938142778HpEmbedSl16X9TJpg() {
   const d = useMobileHome();
   return (
-    <div className="absolute aspect-[362/203.9499969482422] bottom-[-0.32px] left-0 top-0" data-name="fire-3-gty-gmh-260805_1785938142778_hpEmbed_sl_16x9t.jpg" onClick={() => { const href = articleUrl(d?.photos[4]?.href ?? null); if (href) window.location.href = href; }}>
+    <div className="absolute aspect-[362/203.9499969482422] bottom-[-0.32px] left-0 top-0" data-name="fire-3-gty-gmh-260805_1785938142778_hpEmbed_sl_16x9t.jpg">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgFire3GtyGmh2608051785938142778HpEmbedSl16X9TJpg} />
+        <img alt={d?.photos[4]?.imageAlt ?? ""} className="absolute left-0 max-w-none size-full top-0 object-cover" src={absoluteAsset(d?.photos[4]?.imageUrl) ?? imgFire3GtyGmh2608051785938142778HpEmbedSl16X9TJpg} />
       </div>
     </div>
   );
 }
 
 function DivCCqLx5() {
-  return (
-    <div className="bg-[rgba(0,0,0,0.3)] content-stretch flex flex-col items-center p-[2px] relative rounded-[2px] self-stretch shrink-0" data-name="div.CCqLx">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[8.9px] text-[rgba(255,255,255,0.8)] text-center tracking-[-0.3px] whitespace-nowrap">
-        <p className="leading-[12px]">Josh Edelson/AFP via Getty Images</p>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function DivJrFcb8() {
@@ -5269,11 +5040,12 @@ function DivNullbodyRichContentindicators4() {
 }
 
 function DivFvQlf24() {
+  const d = useMobileHome();
   return (
-    <div className="h-[203.63px] relative shrink-0 w-full" data-name="div.FvQLF">
+    <a className="block h-[203.63px] relative shrink-0 w-full" data-name="div.FvQLF" href={articleUrl(d?.photos[4]?.href ?? null) ?? "#"}>
       <Fire3GtyGmh2608051785938142778HpEmbedSl16X9TJpg />
       <DivNullbodyRichContentindicators4 />
-    </div>
+    </a>
   );
 }
 
@@ -5293,22 +5065,17 @@ function Div11() {
   );
 }
 
-function DivSwiperSlide4() {
-  return (
-    <div className="absolute bottom-[20px] content-stretch flex items-center justify-center left-0 max-w-[362px] min-w-[362px] pt-[36.32px] top-[-16.32px] w-[362px]" data-name="div.SwiperSlide">
-      <Div11 />
-    </div>
-  );
-}
-
 function DivSwiperWrapper() {
+  const { index } = useContext(MobileGalleryContext);
   return (
     <div className="h-[243.63px] relative shrink-0 w-full" data-name="div.SwiperWrapper">
-      <DivSwiperSlide />
-      <DivSwiperSlide1 />
-      <DivSwiperSlide2 />
-      <DivSwiperSlide3 />
-      <DivSwiperSlide4 />
+      <div className="absolute bottom-[20px] content-stretch flex items-center justify-center left-0 max-w-[362px] min-w-[362px] pt-[36.32px] top-[-16.32px] w-[362px]" data-name="div.SwiperSlide">
+        {index === 0 && <Div7 />}
+        {index === 1 && <Div8 />}
+        {index === 2 && <Div9 />}
+        {index === 3 && <Div10 />}
+        {index === 4 && <Div11 />}
+      </div>
     </div>
   );
 }
@@ -5338,12 +5105,16 @@ function DivSwiper() {
 }
 
 function SpanHsDdd() {
+  const d = useMobileHome();
+  const { index } = useContext(MobileGalleryContext);
   return (
     <div className="content-stretch flex flex-col items-center max-h-[70px] overflow-clip relative shrink-0 w-full" data-name="span.hsDdd">
       <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Medium',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#656c7a] text-[12.6px] text-center tracking-[-0.28px] whitespace-nowrap">
-        <p className="leading-[20px]" dir="auto">
-          گرامیداشت روز ملی صنعت و معدن با حضور رئیس جمهور
-        </p>
+        <a className="cursor-pointer" href={articleUrl(d?.photos[index]?.href ?? null) ?? "#"}>
+          <p className="leading-[20px]" dir="auto">
+            {d?.photos[index]?.title ?? "گرامیداشت روز ملی صنعت و معدن با حضور رئیس جمهور"}
+          </p>
+        </a>
       </div>
     </div>
   );
@@ -5391,8 +5162,9 @@ function SpanCsJky3() {
 }
 
 function ButtonMLash2() {
+  const { setIndex } = useContext(MobileGalleryContext);
   return (
-    <div className="bg-[#e5e6e9] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH">
+    <div className="bg-[#e5e6e9] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH" onClick={() => setIndex(-1)}>
       <SpanCsJky3 />
     </div>
   );
@@ -5439,13 +5211,25 @@ function Item5Of5Margin() {
 }
 
 function Item1Of() {
+  const { index, total } = useContext(MobileGalleryContext);
   return (
     <div className="content-stretch flex h-[8px] items-center relative shrink-0" data-name="Item 1 of 5">
-      <Item1Of5Margin />
-      <Item2Of5Margin />
-      <Item3Of5Margin />
-      <Item4Of5Margin />
-      <Item5Of5Margin />
+      {Array.from({ length: Math.min(total, 5) }, (_, i) => (
+        <div
+          className={`content-stretch flex flex-col h-[16px] items-start px-[4px] py-[2px] relative shrink-0 ${
+            index === i ? "w-[20px]" : "w-[16px]"
+          }`}
+          key={i}
+        >
+          <div
+            className={
+              index === i
+                ? "bg-[#0045da] border border-[#0045da] border-solid relative rounded-[6px] shrink-0 size-[12px]"
+                : "bg-[#e5e6e9] border border-[#e5e6e9] border-solid relative rounded-[4px] shrink-0 size-[8px]"
+            }
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -5492,8 +5276,9 @@ function SpanCsJky4() {
 }
 
 function ButtonMLash3() {
+  const { setIndex } = useContext(MobileGalleryContext);
   return (
-    <div className="bg-[#e5eeff] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH">
+    <div className="bg-[#e5eeff] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH" onClick={() => setIndex(1)}>
       <SpanCsJky4 />
     </div>
   );
@@ -5520,10 +5305,17 @@ function DivVztd15() {
 }
 
 function Div6() {
+  const d = useMobileHome();
+  const total = Math.max(1, d?.sectionsMeta?.photos?.filled ?? d?.photos?.length ?? 1);
+  const [index, setIndex] = useState(0);
   return (
     <div className="bg-white content-stretch flex flex-col items-start pt-[32px] relative shrink-0 w-[362px]" data-name="div">
       <HeaderVztd />
-      <DivVztd15 />
+      <MobileGalleryContext.Provider
+        value={{ index, total, setIndex: (delta: number) => setIndex((i) => (i + delta + total) % total) }}
+      >
+        <DivVztd15 />
+      </MobileGalleryContext.Provider>
     </div>
   );
 }
@@ -5941,8 +5733,20 @@ function FooterPUpJ() {
 }
 
 export default function DivScrollSpyContainer() {
+  const d = useMobileHome();
+  if (!d) {
+    return (
+      <div className="bg-white content-stretch flex h-full w-[390px] shrink-0 flex-col items-center overflow-x-clip relative" data-name="div.ScrollSpy_container">
+        <h1 className="sr-only">اکوتایمز | پایگاه خبری اقتصاد و فناوری</h1>
+        <HeaderGroup />
+        <Group />
+      </div>
+    );
+  }
   return (
-    <div className="bg-white content-stretch flex h-full w-[390px] shrink-0 flex-col items-center relative" data-name="div.ScrollSpy_container">
+    <div className="bg-white content-stretch flex h-full w-[390px] shrink-0 flex-col items-center overflow-x-clip relative" data-name="div.ScrollSpy_container">
+      <h1 className="sr-only">اکوتایمز | پایگاه خبری اقتصاد و فناوری</h1>
+      <HeaderGroup />
       <Group />
       <DivLiveVideoCard />
       <DivGerEc />

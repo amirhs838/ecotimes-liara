@@ -4,10 +4,16 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-export const db =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function createClient() {
+  return new PrismaClient({
+    // Pooled endpoint first: Neon's free tier has a hard cap of ~10
+    // direct connections, which serverless functions exhaust quickly.
+    datasources: {
+      db: { url: process.env.POSTGRES_PRISMA_URL ?? process.env.DATABASE_URL },
+    },
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   })
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+export const db = globalForPrisma.prisma ?? createClient()
+globalForPrisma.prisma = db

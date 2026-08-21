@@ -24,11 +24,12 @@ model AdminUser {
 // ---------- Taxonomy ----------
 
 model Category {
-  id     String @id @default(cuid())
-  name   String @unique // e.g. "هوش مصنوعی"
-  slug   String @unique // e.g. "ai"
-  order  Int    @default(0) // navigation order
-  posts  Post[]
+  id             String         @id @default(cuid())
+  name           String         @unique // e.g. "هوش مصنوعی"
+  slug           String         @unique // e.g. "ai"
+  order          Int            @default(0) // navigation order
+  posts          Post[]
+  postCategories PostCategory[]
 }
 
 model Tag {
@@ -45,6 +46,18 @@ model PostTag {
   tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([postId, tagId])
+}
+
+// A post may belong to several categories at once; categoryId on Post stays
+// the PRIMARY (main) category — the one shown above news on the homepage.
+model PostCategory {
+  postId     String
+  categoryId String
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
+  @@index([categoryId])
 }
 
 // ---------- Media ----------
@@ -112,8 +125,9 @@ model Post {
   homepageVideoUrl  String? // uploaded file URL or external (Aparat/YouTube) link
 
   // Taxonomy
-  categoryId String
+  categoryId String // PRIMARY (main) category — shown on homepage labels
   category   Category @relation(fields: [categoryId], references: [id])
+  postCategories PostCategory[]
   tags       PostTag[]
 
   // Publishing
@@ -152,11 +166,22 @@ model LiveStream {
 
 // ---------- Homepage layout ----------
 
+// Singleton snapshot (id = 1) of the last-known-good crypto ticker values.
+// Kept in the DB so every serverless instance (and cold start) can serve real
+// prices even when the Binance/CoinGecko upstreams are unreachable from
+// Vercel's region — the frontend then never falls back to "—".
+model MarketSnapshot {
+  id        Int      @id @default(1)
+  items     Json
+  updatedAt DateTime @updatedAt
+}
+
 model HomeSection {
   id         String  @id @default(cuid())
   key        String  @unique // "breaking" | "hero" | "videos" | "photos" | "feature" | category slugs ("ai", "energy", ...)
   name       String // Persian display name, e.g. "اخبار فوری"
   capacity   Int     @default(5) // informational: how many positions the frontend renders
+  order      Int     @default(0) // display order matching the frontend (3002) layout
   placements SectionPlacement[]
 }
 
@@ -174,4 +199,28 @@ model SectionPlacement {
   // and even multiple times in the same section (different positions).
   @@unique([sectionId, position])
   @@index([postId])
+}
+
+// ---------- Chunked upload staging (flaky-network uploads) ----------
+// The browser uploads a file in many small pieces; the server stages them in
+// the DB (no Vercel Blob / object storage involved) and assembles the final
+// object into the object storage when all pieces have arrived.
+
+model UploadSession {
+  id           String   @id @default(cuid())
+  kind         String // "image" | "video"
+  mimeType     String
+  expectedSize Int
+  chunkSize    Int // bytes per chunk
+  createdAt    DateTime @default(now())
+  chunks       UploadChunk[]
+}
+
+model UploadChunk {
+  uploadId String
+  index    Int
+  data     Bytes
+  upload   UploadSession @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@id([uploadId, index])
 }

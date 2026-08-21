@@ -41,10 +41,13 @@ export async function PUT(req: Request, { params }: Ctx) {
   // dedupe positions (keep last occurrence)
   const map = new Map<number, string>();
   for (const p of parsed.data.placements) map.set(p.position, p.postId);
-  const placements = [...map.entries()].map(([position, postId]) => ({
-    position,
-    postId,
-  }));
+  // compress positions so slot N always means the N-th displayed item
+  const placements = [...map.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([, postId], index) => ({
+      position: index + 1,
+      postId,
+    }));
 
   // all referenced posts must exist
   const postIds = [...new Set(placements.map((p) => p.postId))];

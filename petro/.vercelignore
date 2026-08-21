@@ -1,10 +1,7 @@
-# Vercel deployment excludes
-.env*
-storage/
-*.log
-dev-server.log
-dev-run.log
-.zscripts/
-.z-ai-config
-scripts/test-*.ts
-prisma/seed-demo.ts
+node_modules
+.next
+.env
+.env.*
+*.bak
+logs
+.vercel

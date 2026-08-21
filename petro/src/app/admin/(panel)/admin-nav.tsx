@@ -18,7 +18,7 @@ export default function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-t border-zinc-800">
+    <nav className="border-t border-white/15">
       <div className="max-w-[1440px] mx-auto px-4 lg:px-6 flex items-center justify-between">
         <ul className="flex items-center gap-1 overflow-x-auto">
           {items.map((item) => {
@@ -32,8 +32,8 @@ export default function AdminNav() {
                   href={item.href}
                   className={`inline-flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
                     active
-                      ? "border-blue-500 text-white"
-                      : "border-transparent text-zinc-400 hover:text-white"
+                      ? "border-white text-white"
+                      : "border-transparent text-white/75 hover:text-white"
                   }`}
                 >
                   <item.icon className="w-3.5 h-3.5" />

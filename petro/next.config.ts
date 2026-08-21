@@ -9,10 +9,12 @@ const cspDirectives = [
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   // Tailwind + style attributes used across the design system
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https:",
-  "media-src 'self' https:",
+  // blob: needed for client-side image downscaling before upload
+  "img-src 'self' data: https: blob:",
+  "media-src 'self' https: blob:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  // direct browser uploads go to the object storage (Parspack S3) endpoint
+  "connect-src 'self' https:",
   // video embeds (Aparat / YouTube) only
   "frame-src https://www.aparat.com https://aparat.com https://www.youtube.com https://www.youtube-nocookie.com",
   "object-src 'none'",
@@ -51,6 +53,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },
+      { protocol: "https", hostname: "c463335.parspack.net" },
     ],
   },
   experimental: {

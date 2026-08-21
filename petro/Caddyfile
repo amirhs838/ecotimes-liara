@@ -1,3 +1,8 @@
+# Production topology:
+#   - the reference frontend (front/dist) is the site itself
+#   - /api, /news, /category, /admin and media paths go to the Next.js backend on :3001
+# Build first:  npm run build   (root)
+
 :81 {
 	@transform_port_query {
 		query XTransformPort=*
@@ -12,12 +17,23 @@
 		}
 	}
 
-	handle {
+	@backend {
+		path /api/* /api /news/* /news /category/* /category /admin/* /admin /images/* /videos/* /icons/* /placeholders/* /_next/* /sitemap.xml /robots.txt /feed.xml /manifest.json /og-default.png /icon.png /apple-icon.png /ecotimes-logo-red.png /ecotimes-logo-red2.png /ecotimes-logo-white.png
+	}
+
+	handle @backend {
 		reverse_proxy localhost:3001 {
 			header_up Host {host}
 			header_up X-Forwarded-For {remote_host}
 			header_up X-Forwarded-Proto {scheme}
 			header_up X-Real-IP {remote_host}
 		}
+	}
+
+	handle {
+		root * ../front/dist
+		encode gzip
+		try_files {path} /index.html
+		file_server
 	}
 }

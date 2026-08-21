@@ -25,22 +25,24 @@ const categories = [
   { name: "صنایع خلاق", slug: "creative-industries", order: 9 },
 ];
 
-// Homepage sections (design-spec.md §6): 4 system sections + 9 category blocks
+// Homepage sections — order matches the frontend layout top→bottom.
+// Keep this list in sync with what the frontend actually renders:
+// hero / hero-video / videos / top-stories / magazine / digital-economy /
+// ad-1 / ad-2 / photos, plus breaking (header marquee) and category-video
+// (category page video card). "videos" and "category-video" fall back to
+// latest video posts when no manual placements exist.
 const homeSections = [
-  { key: "breaking", name: "به‌روزرسانی زنده", capacity: 8 },
-  { key: "hero", name: "خبر ویژه (هیرو)", capacity: 1 },
-  { key: "videos", name: "ویدیوهای پرطرفدار", capacity: 6 },
-  { key: "photos", name: "اسلایدشوی عکس", capacity: 6 },
-  { key: "top-stories", name: "اخبار برتر (سایدبار)", capacity: 8 },
-  { key: "ai", name: "بلوک هوش مصنوعی", capacity: 13 },
-  { key: "digital-economy", name: "بلوک اقتصاد دیجیتال", capacity: 3 },
-  { key: "health", name: "بلوک سلامت و درمان", capacity: 1 },
-  { key: "biotech-nano", name: "بلوک زیست‌فناوری و نانو", capacity: 14 },
-  { key: "microelectronics", name: "بلوک میکروالکترونیک", capacity: 7 },
-  { key: "energy", name: "بلوک انرژی", capacity: 7 },
-  { key: "water-environment", name: "بلوک آب و محیط‌زیست", capacity: 3 },
-  { key: "food-security", name: "بلوک امنیت غذایی", capacity: 3 },
-  { key: "creative-industries", name: "بلوک صنایع خلاق", capacity: 3 },
+  { key: "hero", name: "خبر ویژه (هیرو)", capacity: 1, order: 1 },
+  { key: "hero-video", name: "۶ خبر زیر ویدیو", capacity: 6, order: 2 },
+  { key: "videos", name: "ویدیوها (هیرو + ۴ باکس)", capacity: 5, order: 3 },
+  { key: "top-stories", name: "اخبار برتر", capacity: 8, order: 4 },
+  { key: "magazine", name: "مجله", capacity: 5, order: 5 },
+  { key: "digital-economy", name: "اقتصاد دیجیتال", capacity: 3, order: 6 },
+  { key: "ad-1", name: "تبلیغات ۱", capacity: 1, order: 7 },
+  { key: "ad-2", name: "تبلیغات ۲", capacity: 1, order: 8 },
+  { key: "photos", name: "گالری عکس", capacity: 6, order: 9 },
+  { key: "breaking", name: "اخبار فوری", capacity: 8, order: 10 },
+  { key: "category-video", name: "ویدیو دسته‌بندی", capacity: 1, order: 11 },
 ];
 
 async function main() {
@@ -56,7 +58,7 @@ async function main() {
   for (const s of homeSections) {
     await prisma.homeSection.upsert({
       where: { key: s.key },
-      update: { name: s.name, capacity: s.capacity },
+      update: { name: s.name, capacity: s.capacity, order: s.order },
       create: s,
     });
   }

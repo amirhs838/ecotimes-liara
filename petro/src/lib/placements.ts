@@ -64,15 +64,26 @@ export async function findConflicts(
 /**
  * Replaces a post's placements (inside the caller's transaction).
  * Evicts any other posts sitting on the requested positions (force semantics).
+ * Single-capacity sections (hero, ad-1, ad-2, category-video...) get fully
+ * replaced by the newest placement so the new post always takes the slot.
  */
 export async function writePlacements(
   tx: Tx,
-  byKey: Map<string, { id: string }>,
+  byKey: Map<string, { id: string; key: string; name: string; capacity: number }>,
   postId: string,
   placements: PlacementInput[]
 ): Promise<void> {
   await tx.sectionPlacement.deleteMany({ where: { postId } });
   if (placements.length === 0) return;
+
+  for (const p of placements) {
+    const section = byKey.get(p.sectionKey);
+    if (section && section.capacity === 1) {
+      await tx.sectionPlacement.deleteMany({
+        where: { sectionId: section.id, postId: { not: postId } },
+      });
+    }
+  }
 
   await tx.sectionPlacement.deleteMany({
     where: {
@@ -90,4 +101,20 @@ export async function writePlacements(
       position: p.position,
     })),
   });
+
+  // compress positions 1..n so a gap never shifts the displayed order
+  const sectionIds = [...new Set(placements.map((p) => byKey.get(p.sectionKey)!.id))];
+  for (const sectionId of sectionIds) {
+    const rows = await tx.sectionPlacement.findMany({
+      where: { sectionId },
+      orderBy: { position: "asc" },
+      select: { id: true },
+    });
+    for (let i = 0; i < rows.length; i++) {
+      await tx.sectionPlacement.update({
+        where: { id: rows[i].id },
+        data: { position: i + 1 },
+      });
+    }
+  }
 }

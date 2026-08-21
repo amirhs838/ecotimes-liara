@@ -32,12 +32,16 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: '0.0.0.0',
-      port: parseInt(process.env.PORT || '8443'),
+      port: parseInt(process.env.PORT || '3000'),
       strictPort: true,
       watch: { ignored: ['**/.figma/**'] },
       proxy: Object.fromEntries(
         [
           '/api',
+          '/news',
+          '/category',
+          '/admin',
+          '/_next',
           '/sitemap.xml',
           '/robots.txt',
           '/feed.xml',
@@ -52,7 +56,10 @@ export default defineConfig(({ mode }) => {
           '/ecotimes-logo-red.png',
           '/ecotimes-logo-red2.png',
           '/ecotimes-logo-white.png',
-        ].map((route) => [route, { target: backendUrl, changeOrigin: false }])
+          '/ecotimes-logo-mobile.png',
+          '/ecotimes-logo-mobile-footer.png',
+          '/market',
+        ].map((route) => [route, { target: backendUrl, changeOrigin: false, ws: true }])
       ),
     },
     preview: {

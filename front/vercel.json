@@ -1,0 +1,29 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://ecotimes-api.vercel.app/api/:path*" },
+    { "source": "/news/:path*", "destination": "https://ecotimes-api.vercel.app/news/:path*" },
+    { "source": "/category/:path*", "destination": "https://ecotimes-api.vercel.app/category/:path*" },
+    { "source": "/admin", "destination": "https://ecotimes-api.vercel.app/admin" },
+    { "source": "/admin/:path*", "destination": "https://ecotimes-api.vercel.app/admin/:path*" },
+    { "source": "/_next/:path*", "destination": "https://ecotimes-api.vercel.app/_next/:path*" },
+    { "source": "/images/:path*", "destination": "https://ecotimes-api.vercel.app/images/:path*" },
+    { "source": "/videos/:path*", "destination": "https://ecotimes-api.vercel.app/videos/:path*" },
+    { "source": "/icons/:path*", "destination": "https://ecotimes-api.vercel.app/icons/:path*" },
+    { "source": "/placeholders/:path*", "destination": "https://ecotimes-api.vercel.app/placeholders/:path*" },
+    { "source": "/market/:path*", "destination": "https://ecotimes-api.vercel.app/market/:path*" },
+    { "source": "/sitemap.xml", "destination": "https://ecotimes-api.vercel.app/sitemap.xml" },
+    { "source": "/feed.xml", "destination": "https://ecotimes-api.vercel.app/feed.xml" },
+    { "source": "/manifest.json", "destination": "https://ecotimes-api.vercel.app/manifest.json" },
+    { "source": "/og-default.png", "destination": "https://ecotimes-api.vercel.app/og-default.png" },
+    { "source": "/icon.png", "destination": "https://ecotimes-api.vercel.app/icon.png" },
+    { "source": "/apple-icon.png", "destination": "https://ecotimes-api.vercel.app/apple-icon.png" },
+    { "source": "/ecotimes-logo-red.png", "destination": "https://ecotimes-api.vercel.app/ecotimes-logo-red.png" },
+    { "source": "/ecotimes-logo-red2.png", "destination": "https://ecotimes-api.vercel.app/ecotimes-logo-red2.png" },
+    { "source": "/ecotimes-logo-white.png", "destination": "https://ecotimes-api.vercel.app/ecotimes-logo-white.png" },
+    { "source": "/ecotimes-logo-mobile.png", "destination": "https://ecotimes-api.vercel.app/ecotimes-logo-mobile.png" },
+    { "source": "/ecotimes-logo-mobile-footer.png", "destination": "https://ecotimes-api.vercel.app/ecotimes-logo-mobile-footer.png" }
+  ]
+}

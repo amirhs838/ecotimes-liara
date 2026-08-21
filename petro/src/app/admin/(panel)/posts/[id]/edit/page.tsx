@@ -24,6 +24,10 @@ function mapPost(p: any): PostFormInitial {
     status: p.status,
     publishedAtLocal: toLocalInput(p.publishedAt),
     categoryId: p.categoryId,
+    categoryIds:
+      p.postCategories && p.postCategories.length
+        ? p.postCategories.map((pc: any) => pc.categoryId)
+        : [p.categoryId],
     tags: p.tags.map((t: any) => t.tag.name),
     homeImage: p.homeImage ?? null,
     homeImageAlt: p.homeImageAlt ?? "",

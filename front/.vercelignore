@@ -1,0 +1,23 @@
+node_modules
+dist
+.env
+.env.*
+*.bak
+.vercel
+.runtime
+compare-*
+*-profile
+/imports
+/app-*.png
+/app-*.pdf
+/div.ScrollSpy_container.*
+/final-*.png
+/full-comparison-sheet.png
+/middle-comparison.png
+/pixel-*.png
+/reference-*.png
+/reference-check.html
+/fonts.json
+/React Tailwind Component.zip
+/*.log
+/vite-dev.log.err

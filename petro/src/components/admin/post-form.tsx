@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import type { UploadedMedia } from "@/lib/upload-client";
 import { slugify } from "@/lib/slugify";
 import { parseVideoEmbed } from "@/lib/video-embed";
+import { sectionRoleHint } from "@/lib/section-role";
 import { Loader2, AlertTriangle } from "lucide-react";
 
 // ---------- types ----------
@@ -26,6 +27,7 @@ export interface PostFormInitial {
   status: "DRAFT" | "SCHEDULED" | "PUBLISHED";
   publishedAtLocal: string;
   categoryId: string;
+  categoryIds: string[];
   tags: string[];
   homeImage: UploadedMedia | null;
   homeImageAlt: string;
@@ -73,6 +75,7 @@ export const emptyPostForm: PostFormInitial = {
   status: "DRAFT",
   publishedAtLocal: "",
   categoryId: "",
+  categoryIds: [],
   tags: [],
   homeImage: null,
   homeImageAlt: "",
@@ -168,6 +171,18 @@ export default function PostForm({
   function set<K extends keyof PostFormInitial>(key: K, value: PostFormInitial[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
+  function toggleCategory(id: string) {
+    setForm((f) => {
+      const has = f.categoryIds.includes(id);
+      const categoryIds = has
+        ? f.categoryIds.filter((x) => x !== id)
+        : [...f.categoryIds, id];
+      const categoryId = categoryIds.includes(f.categoryId)
+        ? f.categoryId
+        : (categoryIds[0] ?? "");
+      return { ...f, categoryIds, categoryId };
+    });
+  }
 
   function onTitleChange(v: string) {
     setForm((f) => ({
@@ -199,13 +214,22 @@ export default function PostForm({
     return m;
   }, [sections]);
 
+  const capacityByKey = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const s of sections) m.set(s.key, s.capacity);
+    return m;
+  }, [sections]);
+
   function validate(): boolean {
     const e: Record<string, string> = {};
     if (!form.title.trim()) e.title = "تیتر الزامی است";
     if (!form.lead.trim()) e.lead = "لید الزامی است";
     const bodyText = form.body.replace(/<[^>]*>/g, "").trim();
     if (!bodyText) e.body = "بدنه خبر الزامی است";
-    if (!form.categoryId) e.categoryId = "دسته‌بندی را انتخاب کنید";
+    if (form.categoryIds.length === 0)
+      e.categoryIds = "حداقل یک دسته‌بندی انتخاب کنید";
+    else if (!form.categoryId || !form.categoryIds.includes(form.categoryId))
+      e.categoryId = "دسته‌بندی اصلی را انتخاب کنید";
     if (!form.homeImage) e.homeImage = "تصویر صفحه اصلی الزامی است";
     if (!form.homeImageAlt.trim()) e.homeImageAlt = "متن جایگزین تصویر الزامی است";
     if (form.innerImage && !form.innerImageAlt.trim())
@@ -247,6 +271,7 @@ export default function PostForm({
       status: form.status,
       publishedAt: new Date(form.publishedAtLocal).toISOString(),
       categoryId: form.categoryId,
+      categoryIds: form.categoryIds,
       tags: form.tags,
       homeImageId: form.homeImage!.id,
       homeImageAlt: form.homeImageAlt.trim(),
@@ -268,28 +293,47 @@ export default function PostForm({
   async function submit(mode: "strict" | "force") {
     setSaving(true);
     try {
-      const res = await fetch(
-        postId ? `/api/admin/posts/${postId}` : "/api/admin/posts",
-        {
-          method: postId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(buildPayload(mode)),
-        }
-      );
-      const data = await res.json().catch(() => null);
+      let currentMode = mode;
+      let replacedSingleSlot = false;
+      for (;;) {
+        const res = await fetch(
+          postId ? `/api/admin/posts/${postId}` : "/api/admin/posts",
+          {
+            method: postId ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(buildPayload(currentMode)),
+          }
+        );
+        const data = await res.json().catch(() => null);
 
-      if (res.status === 409 && data?.conflicts) {
-        setConflicts(data.conflicts);
+        if (res.status === 409 && data?.conflicts) {
+          // If every conflict is a single-capacity slot (hero, its video box,
+          // ads...), the new post simply takes the place — no dialog needed.
+          // Behaves the same for new posts and edits of old posts.
+          const singleSlotsOnly = (data.conflicts as Conflict[]).every(
+            (c) => (capacityByKey.get(c.sectionKey) ?? Infinity) <= 1
+          );
+          if (currentMode === "strict" && singleSlotsOnly) {
+            currentMode = "force";
+            replacedSingleSlot = true;
+            continue;
+          }
+          setConflicts(data.conflicts);
+          return;
+        }
+        if (!res.ok || !data?.ok) {
+          toast.error(data?.error ?? "ذخیره پست ناموفق بود");
+          return;
+        }
+        toast.success(postId ? "پست به‌روزرسانی شد" : "پست ایجاد شد");
+        if (replacedSingleSlot) {
+          toast.info("پست قبلیِ باکس تک‌خانه‌ای جایگزین شد");
+        }
+        setConflicts(null);
+        router.push("/admin/posts");
+        router.refresh();
         return;
       }
-      if (!res.ok || !data?.ok) {
-        toast.error(data?.error ?? "ذخیره پست ناموفق بود");
-        return;
-      }
-      toast.success(postId ? "پست به‌روزرسانی شد" : "پست ایجاد شد");
-      setConflicts(null);
-      router.push("/admin/posts");
-      router.refresh();
     } catch {
       toast.error("خطا در برقراری ارتباط با سرور");
     } finally {
@@ -484,19 +528,51 @@ export default function PostForm({
             </div>
 
             <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
-              <Field label="دسته‌بندی / محل نمایش پست" required error={errors.categoryId}>
-                <select
-                  value={form.categoryId}
-                  onChange={(e) => set("categoryId", e.target.value)}
-                  className="w-full bg-white border border-zinc-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                >
-                  <option value="">انتخاب کنید...</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+              <Field
+                label="دسته‌بندی‌ها"
+                required
+                error={errors.categoryIds ?? errors.categoryId}
+                hint="هرچند دسته‌بندی که بخواهید انتخاب کنید؛ «اصلی» همان دسته‌ای است که بالای خبر در هوم‌پیج نمایش داده می‌شود"
+              >
+                <div className="max-h-56 overflow-y-auto border border-zinc-300 rounded-md divide-y divide-zinc-100">
+                  {categories.length === 0 && (
+                    <div className="px-3 py-3 text-sm text-zinc-400">
+                      در حال بارگذاری دسته‌بندی‌ها...
+                    </div>
+                  )}
+                  {categories.map((c) => {
+                    const checked = form.categoryIds.includes(c.id);
+                    return (
+                      <label
+                        key={c.id}
+                        className={`flex items-center gap-3 px-3 py-2 text-sm cursor-pointer transition-colors ${
+                          checked ? "bg-blue-50/60" : "hover:bg-zinc-50"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleCategory(c.id)}
+                          className="accent-blue-600 size-4 shrink-0"
+                        />
+                        <span className="flex-1 font-medium text-zinc-700">
+                          {c.name}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">
+                          <input
+                            type="radio"
+                            name="mainCategory"
+                            disabled={!checked}
+                            checked={form.categoryId === c.id}
+                            onChange={() => set("categoryId", c.id)}
+                            className="accent-red-600 size-3.5 shrink-0"
+                          />
+                          اصلی
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
               </Field>
               <Field label="برچسب‌ها" hint="Enter برای افزودن — حداکثر ۲۰ برچسب">
                 <TagInput
@@ -666,9 +742,10 @@ export default function PostForm({
             قرارگیری در بخش‌های صفحه اصلی
           </h3>
           <p className="text-xs text-zinc-500 mb-4 leading-relaxed">
-            برای هر بخش، موقعیت دلخواه را انتخاب کنید. یک پست می‌تواند هم‌زمان
-            در چند بخش و حتی چند موقعیت از یک بخش قرار گیرد. اگر موقعیت اشغال
-            باشد، هنگام ذخیره هشدار می‌گیرید و می‌توانید جایگزین کنید.
+            بخش‌های تک‌خانه‌ای (هیرو، باکس ویدیوی کنار هیرو، تبلیغات) شماره نمی‌خوان:
+            کافی است تیک بزنید — پست شما به‌طور خودکار جایگزین پست قبلی می‌شود.
+            برای بخش‌های چندخانه‌ای، موقعیت را عددی وارد کنید؛ اگر اشغال باشد،
+            هنگام ذخیره هشدار می‌گیرید و می‌توانید جایگزین کنید.
           </p>
           <div className="divide-y divide-zinc-100">
             {sections.map((s) => {
@@ -684,12 +761,15 @@ export default function PostForm({
                         setForm((f) => {
                           const placements = { ...f.placements };
                           if (e.target.checked) {
-                            // first free position within capacity
-                            let pos = 1;
-                            const taken = new Set(
-                              s.placements.map((p) => p.position)
-                            );
-                            while (taken.has(pos) && pos <= s.capacity) pos++;
+                            // single-capacity sections always take slot 1
+                            // (the newest post replaces the previous one)
+                            let pos = s.capacity === 1 ? 1 : 1;
+                            if (s.capacity > 1) {
+                              const taken = new Set(
+                                s.placements.map((p) => p.position)
+                              );
+                              while (taken.has(pos) && pos <= s.capacity) pos++;
+                            }
                             placements[s.key] = pos;
                           } else {
                             delete placements[s.key];
@@ -702,11 +782,21 @@ export default function PostForm({
                     <span className="text-sm font-medium text-zinc-800">
                       {s.name}
                     </span>
+                    {sectionRoleHint(s.key) && (
+                      <span className="text-[10px] text-zinc-400">
+                        {sectionRoleHint(s.key)}
+                      </span>
+                    )}
                     <span className="text-[10px] text-zinc-400">
                       (ظرفیت {s.capacity})
                     </span>
+                    {s.capacity <= 1 && (
+                      <span className="text-[10px] text-blue-500">
+                        تک‌خانه — جایگزینی خودکار
+                      </span>
+                    )}
                   </label>
-                  {checked && (
+                  {checked && s.capacity > 1 && (
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-zinc-500">موقعیت:</span>
                       <Input

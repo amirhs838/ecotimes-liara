@@ -24,15 +24,21 @@ export type NavItem = { label: string; href: string; hot?: boolean };
 
 export type MarketItem = [string, string, string];
 
+export type SectionMeta = { name: string; capacity: number; filled: number };
+
 export type HomeData = {
   sections: Record<string, HomePost[]>;
+  sectionsMeta: Record<string, SectionMeta>;
   latest: HomePost[];
   mostViewed: HomePost[];
   nav: NavItem[];
   live: { enabled: boolean; title: string } | null;
 };
 
-export const API_URL = String(import.meta.env.VITE_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
+// Same-origin URLs everywhere: the dev server proxies /api, /news, /category,
+// /admin and media paths to the backend, so the browser never leaves the
+// frontend port. Override with VITE_API_URL only when needed.
+export const API_URL = String(import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
 export function absoluteAsset(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
@@ -46,27 +52,26 @@ export function articleUrl(href: string | null): string | null {
   return `${API_URL}${href}`;
 }
 
-let homeDataPromise: Promise<HomeData> | null = null;
-
 export function fetchHomeData(): Promise<HomeData> {
-  homeDataPromise ??= (async () => {
+  return (async () => {
     const res = await fetch(`${API_URL}/api/public/home`);
     if (!res.ok) throw new Error(`home api responded ${res.status}`);
     const json = await res.json();
     if (!json.ok) throw new Error("home api responded not-ok");
     return json.data as HomeData;
   })();
-  return homeDataPromise;
 }
 
-export async function fetchMarket(): Promise<MarketItem[] | null> {
-  try {
-    const res = await fetch(`${API_URL}/api/public/market`);
-    if (!res.ok) return null;
-    const json = await res.json();
-    if (!json.ok) return null;
-    return json.data.items as MarketItem[];
-  } catch {
-    return null;
-  }
+export function fetchMarket(): Promise<MarketItem[] | null> {
+  return (async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/public/market`);
+      if (!res.ok) return null;
+      const json = await res.json();
+      if (!json.ok) return null;
+      return json.data.items as MarketItem[];
+    } catch {
+      return null;
+    }
+  })();
 }

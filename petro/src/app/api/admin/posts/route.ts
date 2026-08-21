@@ -99,6 +99,9 @@ export async function POST(req: Request) {
       data: {
         ...postDataFromInput(input, slug, cleanBody),
         tags: { create: tagIds.map((tagId) => ({ tagId })) },
+        postCategories: {
+          create: input.categoryIds.map((categoryId) => ({ categoryId })),
+        },
       },
     });
     await writePlacements(tx, byKey, created.id, placements);

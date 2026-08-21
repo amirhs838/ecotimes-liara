@@ -1,7 +1,15 @@
 {
-  "description": "Delivers an exact React and Tailwind-based replica of the specified design, ensuring pixel-perfect UI for developers seeking precise implementation.",
+  "title": "اکوتایمز | پایگاه خبری اقتصاد و فناوری",
+  "description": "اکوتایمز، پایگاه خبری اقتصاد و فناوری؛ تازه‌ترین اخبار و تحلیل‌های هوش مصنوعی، اقتصاد دیجیتال، سلامت و درمان، زیست‌فناوری و نانو، میکروالکترونیک، انرژی، آب و محیط‌زیست، امنیت غذایی و صنایع خلاق.",
+  "language": "fa",
   "robots": {
-    "index": false
+    "index": true
+  },
+  "icons": {
+    "icon": "/icon.png"
+  },
+  "customScripts": {
+    "headStart": "<!-- seo --><meta property=\"og:type\" content=\"website\" /><meta property=\"og:url\" content=\"https://ecotimes-front.vercel.app/\" /><meta property=\"og:locale\" content=\"fa_IR\" /><meta property=\"og:site_name\" content=\"اکوتایمز\" /><meta property=\"og:image\" content=\"https://ecotimes-front.vercel.app/og-default.png\" /><meta name=\"twitter:card\" content=\"summary_large_image\" /><meta name=\"twitter:title\" content=\"اکوتایمز | پایگاه خبری اقتصاد و فناوری\" /><meta name=\"twitter:description\" content=\"اکوتایمز، پایگاه خبری اقتصاد و فناوری؛ تازه‌ترین اخبار و تحلیل‌های هوش مصنوعی، اقتصاد دیجیتال، سلامت و درمان، زیست‌فناوری و نانو، میکروالکترونیک، انرژی، آب و محیط‌زیست، امنیت غذایی و صنایع خلاق.\" /><meta name=\"twitter:image\" content=\"https://ecotimes-front.vercel.app/og-default.png\" /><link rel=\"canonical\" href=\"https://ecotimes-front.vercel.app/\" /><meta name=\"theme-color\" content=\"#ffffff\" /><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"NewsMediaOrganization\",\"name\":\"اکوتایمز\",\"alternateName\":\"EcoTimes\",\"url\":\"https://ecotimes-front.vercel.app\",\"logo\":{\"@type\":\"ImageObject\",\"url\":\"https://ecotimes-front.vercel.app/og-default.png\"},\"sameAs\":[],\"inLanguage\":\"fa-IR\"}</script><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":\"اکوتایمز | پایگاه خبری اقتصاد و فناوری\",\"url\":\"https://ecotimes-front.vercel.app\",\"inLanguage\":\"fa-IR\"}</script><!-- /seo -->"
   },
   "accessibility": {
     "addBypassLinks": false,

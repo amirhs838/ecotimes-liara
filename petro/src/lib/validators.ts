@@ -26,7 +26,10 @@ export const postInputSchema = z
     publishedAt: z
       .string()
       .refine((s) => !Number.isNaN(Date.parse(s)), "تاریخ انتشار نامعتبر است"),
-    categoryId: z.string().min(1, "دسته‌بندی الزامی است"),
+    categoryId: z.string().min(1, "دسته‌بندی اصلی الزامی است"),
+    categoryIds: z
+      .array(z.string().min(1))
+      .min(1, "حداقل یک دسته‌بندی انتخاب کنید"),
     tags: z.array(z.string().trim().min(1).max(60)).max(20).default([]),
     homeImageId: z.string().min(1, "تصویر صفحه اصلی الزامی است"),
     homeImageAlt: z.string().trim().min(1, "متن جایگزین تصویر الزامی است").max(300),
@@ -46,6 +49,13 @@ export const postInputSchema = z
     placementsMode: z.enum(["strict", "force"]).default("strict"),
   })
   .superRefine((data, ctx) => {
+    if (!data.categoryIds.includes(data.categoryId)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["categoryId"],
+        message: "دسته‌بندی اصلی باید یکی از دسته‌بندی‌های انتخاب‌شده باشد",
+      });
+    }
     if (data.innerImageId && !data.innerImageAlt.trim()) {
       ctx.addIssue({
         code: "custom",
