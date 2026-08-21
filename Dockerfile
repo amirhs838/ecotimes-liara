@@ -61,7 +61,7 @@ COPY --from=base /app/package.json ./package.json
 COPY --from=base /app/scripts ./scripts
 COPY --from=base /app/petro ./petro
 COPY --from=base /app/front ./front
-COPY --from=base /app/node_modules ./node_modules
+# root has no node_modules (only petro/front) — skip
 # petro & front node_modules already inside their folders from base
 COPY --from=base /app/petro/node_modules ./petro/node_modules
 COPY --from=base /app/front/node_modules ./front/node_modules
