@@ -29,4 +29,3 @@ petro/.git.bak
 !.env.example
 .DS_Store
 
-petro/public

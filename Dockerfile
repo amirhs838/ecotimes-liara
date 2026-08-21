@@ -26,7 +26,7 @@ RUN npm --prefix front ci --include=optional || npm --prefix front install --inc
 COPY scripts ./scripts
 COPY petro ./petro
 COPY front ./front
-# COPY petro/public excluded for Liara (S3 mode)
+COPY petro/public ./petro/public
 
 # Ensure prisma client is generated for build (DATABASE_URL not needed for generate)
 RUN npm --prefix petro run db:generate
