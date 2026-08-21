@@ -75,7 +75,16 @@ function shouldProxy(pathname) {
 }
 
 function proxy(req, res) {
-  const headers = { ...req.headers, host: backend.host };
+  // Preserve original Host for CSRF check (isSameOrigin uses x-forwarded-host/host)
+  // and add forwarded headers so Next.js sees the real client IP/proto
+  const headers = {
+    ...req.headers,
+    host: req.headers.host ?? backend.host,
+    "x-forwarded-host": req.headers.host ?? backend.host,
+    "x-forwarded-proto": req.headers["x-forwarded-proto"] ?? (req.socket.encrypted ? "https" : "http"),
+    "x-forwarded-for": req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "",
+    "x-real-ip": req.socket.remoteAddress ?? "",
+  };
   delete headers["accept-encoding"];
   const upstream = httpRequest(
     {
