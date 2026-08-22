@@ -50,6 +50,10 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: false,
   images: {
+    // Disable Next.js image optimization on Liara — the /_next/image endpoint
+    // fails behind the reverse proxy (query params get mangled). All images
+    // load directly from /api/media/<key> which works perfectly.
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },
