@@ -17,6 +17,8 @@ front/*.svg
 front/*.zip
 petro/storage
 petro/download
+petro/public/images
+petro/public/videos
 backups
 reference-design
 brand-assets

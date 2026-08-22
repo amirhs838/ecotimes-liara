@@ -26,7 +26,7 @@ RUN npm --prefix front ci --include=optional || npm --prefix front install --inc
 COPY scripts ./scripts
 COPY petro ./petro
 COPY front ./front
-COPY petro/public ./petro/public
+# petro/public is included via .dockerignore (images/videos excluded to keep build fast)
 
 # Ensure prisma client is generated for build (DATABASE_URL not needed for generate)
 RUN npm --prefix petro run db:generate

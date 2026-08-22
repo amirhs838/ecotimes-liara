@@ -20,6 +20,8 @@ petro/.next
 petro/storage
 petro/.vercel
 petro/storage/uploads
+petro/public/images
+petro/public/videos
 petro/.zscripts
 petro/download
 backups
