@@ -12,51 +12,65 @@ const CORS_HEADERS = {
 // Ticker order as displayed in the header strip.
 const SYMBOLS = ["BTC", "ETH", "BNB", "XRP", "SOL", "TRX", "HYPE"] as const;
 
-// Cache serves instantly; the upstream refresh runs after the response has
-// been sent (after()) so page loads / 30s polls never wait on Binance or
-// CoinGecko. Failed rows keep their last-known-good value (memory or the DB
-// snapshot) so the strip never shows "—" once real prices have been fetched.
 const CACHE_TTL_MS = 20_000;
+const WALLEX_API = "https://api.wallex.ir/hector/web/v1/markets";
 
 type TickerRow = [string, string, string];
 
 let cache: { at: number; items: (TickerRow | null)[] } | null = null;
 let refreshing = false;
 
-function formatPrice(price: number): string {
-  const opts =
-    price >= 1
-      ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-      : { minimumFractionDigits: 2, maximumFractionDigits: 4 };
-  return `$${price.toLocaleString("en-US", opts)}`;
+/** Formats a large Toman price compactly so the ticker strip stays clean.
+ *  BTC → "14.5B"   ETH → "455M"   XRP → "278K"
+ */
+function formatToman(price: number): string {
+  if (price >= 1_000_000_000) {
+    const v = price / 1_000_000_000;
+    return (v >= 100 ? Math.round(v) : v.toFixed(1).replace(/\.0$/, "")) + "B";
+  }
+  if (price >= 1_000_000) {
+    const v = price / 1_000_000;
+    return (v >= 100 ? Math.round(v) : v.toFixed(1).replace(/\.0$/, "")) + "M";
+  }
+  if (price >= 1_000) {
+    return Math.round(price / 1_000) + "K";
+  }
+  return Math.round(price).toLocaleString("en-US");
 }
 
-async function fetchBinance(symbol: string): Promise<TickerRow> {
-  const res = await fetch(
-    `https://data-api.binance.vision/api/v3/ticker/24hr?symbol=${symbol}USDT`,
-    { cache: "no-store", signal: AbortSignal.timeout(4000) }
-  );
-  if (!res.ok) throw new Error(`upstream ${res.status} for ${symbol}`);
-  const row = await res.json();
-  const price = Number(row.lastPrice);
-  const change = Number(row.priceChangePercent);
-  if (!Number.isFinite(price) || !Number.isFinite(change)) throw new Error("invalid payload");
-  return [symbol, formatPrice(price), `${change >= 0 ? "+" : "-"}${Math.abs(change).toFixed(2)}%`];
+function formatChange(change: number): string {
+  return `${change >= 0 ? "+" : "-"}${Math.abs(change).toFixed(2)}%`;
 }
 
-// HYPE is not listed on Binance (HYPEUSDT returns "Invalid symbol"), so it is
-// sourced from CoinGecko's Hyperliquid ticker.
-async function fetchHype(): Promise<TickerRow> {
-  const res = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd&include_24hr_change=true",
-    { cache: "no-store", signal: AbortSignal.timeout(4000) }
-  );
-  if (!res.ok) throw new Error(`upstream ${res.status} for HYPE`);
-  const row = await res.json();
-  const price = Number(row.hyperliquid?.usd);
-  const change = Number(row.hyperliquid?.usd_24h_change);
-  if (!Number.isFinite(price) || !Number.isFinite(change)) throw new Error("invalid payload");
-  return ["HYPE", formatPrice(price), `${change >= 0 ? "+" : "-"}${Math.abs(change).toFixed(2)}%`];
+interface WallexMarket {
+  symbol: string;
+  base_asset: string;
+  quote_asset: string;
+  price: string;
+  change_24h: number;
+}
+
+async function fetchWallexMarkets(): Promise<Map<string, { price: number; change: number }>> {
+  const res = await fetch(WALLEX_API, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000),
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`wallex ${res.status}`);
+  const json = await res.json();
+  if (!json.success || !Array.isArray(json.result?.markets)) throw new Error("invalid wallex payload");
+
+  const map = new Map<string, { price: number; change: number }>();
+  for (const m of json.result.markets as WallexMarket[]) {
+    if (m.quote_asset !== "TMN") continue;
+    const base = m.base_asset.toUpperCase();
+    const price = Number(m.price);
+    const change = Number(m.change_24h);
+    if (Number.isFinite(price) && Number.isFinite(change)) {
+      map.set(base, { price, change });
+    }
+  }
+  return map;
 }
 
 async function loadSnapshot(): Promise<(TickerRow | null)[] | null> {
@@ -86,24 +100,34 @@ async function refreshAndSave() {
   refreshing = true;
   try {
     const lastGood: (TickerRow | null)[] | null = cache ? cache.items : await loadSnapshot();
-    const rows = await Promise.all(
-      SYMBOLS.map((symbol) =>
-        (symbol === "HYPE" ? fetchHype() : fetchBinance(symbol)).catch(() => null)
-      )
-    );
-    const merged = rows.map((row, i) => row ?? lastGood?.[i] ?? null);
-    cache = { at: Date.now(), items: merged };
-    await saveSnapshot(merged);
+
+    let wallexMap: Map<string, { price: number; change: number }> | null = null;
+    try {
+      wallexMap = await fetchWallexMarkets();
+    } catch {
+      // wallex unreachable — fall through to last-known-good
+    }
+
+    const rows: (TickerRow | null)[] = SYMBOLS.map((symbol, i) => {
+      if (wallexMap) {
+        const d = wallexMap.get(symbol);
+        if (d) {
+          return [symbol, formatToman(d.price), formatChange(d.change)] as TickerRow;
+        }
+      }
+      return lastGood?.[i] ?? null;
+    });
+
+    cache = { at: Date.now(), items: rows };
+    await saveSnapshot(rows);
   } finally {
     refreshing = false;
   }
 }
 
-// GET /api/public/market — crypto ticker data, proxied from Binance public
-// data API (HYPE via CoinGecko). Responses are served instantly from the
-// in-memory cache; the upstream refresh happens after the response is sent,
-// so browsers never wait on the upstreams. Failed rows keep their
-// last-known-good value (memory or the DB snapshot).
+// GET /api/public/market — crypto ticker data from Wallex (Iranian market).
+// Single upstream call fetches all symbols. Responses are served instantly
+// from the in-memory cache; refresh happens after the response is sent.
 export async function GET() {
   if (cache) {
     after(() => {
@@ -112,8 +136,6 @@ export async function GET() {
     return NextResponse.json({ ok: true, data: { items: cache.items } }, { headers: CORS_HEADERS });
   }
 
-  // Cold instance: load the DB snapshot and attempt a refresh before the
-  // first response so the very first paint has real values.
   await refreshAndSave();
   return NextResponse.json({ ok: true, data: { items: cache?.items ?? [] } }, { headers: CORS_HEADERS });
 }
