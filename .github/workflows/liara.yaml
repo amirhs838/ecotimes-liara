@@ -1,19 +1,42 @@
-﻿name: CD-Liara
+﻿name: Build & Deploy to Liara
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          node-version: "22"
-      - name: update-liara
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/ecotimes:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to Liara (pre-built image)
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
         run: |
           npm i -g @liara/cli@9
-          liara deploy --app="ecotimes" --api-token="$LIARA_TOKEN" --port 3000 --no-app-logs
+          liara deploy --app="ecotimes" \
+            --api-token="$LIARA_TOKEN" \
+            --port=3000 \
+            --image="ghcr.io/${{ github.repository_owner }}/ecotimes:latest" \
+            --no-app-logs
