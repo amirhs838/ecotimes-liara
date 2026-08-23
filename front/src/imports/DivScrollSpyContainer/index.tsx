@@ -1928,7 +1928,7 @@ function Span1() {
 
 function DivPaginationText() {
   return (
-    <div className="absolute border-[#515662] border-b border-solid content-stretch flex items-center left-0 pb-[12px] pt-[8px] right-0 top-[319px]" data-name="div.PaginationText">
+    <div className="border-[#515662] border-b border-solid content-stretch flex items-center mt-[8px] pb-[12px] pt-[8px] w-full" data-name="div.PaginationText">
       <Span1 />
     </div>
   );
@@ -2792,7 +2792,7 @@ function DivPaginationContent() {
 
 function Div() {
   return (
-    <div className="absolute content-stretch flex flex-col isolate items-start left-0 right-0 top-[374px]" data-name="div">
+    <div className="content-stretch flex flex-col isolate items-start mt-[16px] w-full" data-name="div">
       <DivVztd3 />
     </div>
   );
@@ -2928,7 +2928,7 @@ function DivVztd9() {
 
 function DivLiAe17() {
   return (
-    <div className="absolute content-stretch flex flex-col gap-[8px] items-start left-0 right-0 rounded-[6px] top-0" data-name="div.liAe">
+    <div className="content-stretch flex flex-col gap-[8px] items-start rounded-[6px] w-full" data-name="div.liAe">
       <Video1 />
       <DivVztd9 />
     </div>
@@ -2937,10 +2937,10 @@ function DivLiAe17() {
 
 function DivBlockSingleColumn() {
   return (
-    <div className="h-[714.55px] relative shrink-0 w-full" data-name="div.block__single-column">
+    <div className="relative shrink-0 w-full" data-name="div.block__single-column">
+      <DivLiAe17 />
       <DivPaginationText />
       <Div />
-      <DivLiAe17 />
     </div>
   );
 }
