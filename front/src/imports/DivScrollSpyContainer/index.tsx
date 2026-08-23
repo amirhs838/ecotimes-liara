@@ -1928,7 +1928,7 @@ function Span1() {
 
 function DivPaginationText() {
   return (
-    <div className="border-[#515662] border-b border-solid content-stretch flex items-center pb-[12px] pt-[8px] w-full" data-name="div.PaginationText">
+    <div className="absolute border-[#515662] border-b border-solid content-stretch flex items-center left-0 pb-[12px] pt-[8px] right-0 top-[319px]" data-name="div.PaginationText">
       <Span1 />
     </div>
   );
@@ -1958,7 +1958,7 @@ function DivTedLassoseason4Carditags() {
 function H2TedLassoseason4Cardiheadline() {
   const d = useMobileHome();
   return (
-    <div className="min-h-[48.28px] relative shrink-0 w-full" data-name="h2#TedLassoseason4Cardiheadline">
+    <div className="h-[48.28px] overflow-clip relative shrink-0 w-full" data-name="h2#TedLassoseason4Cardiheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[12.9px] text-right text-white w-[173.82px]" href={articleUrl(d?.videos[0]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[18.4px]" dir="auto">
           {d?.videos[0]?.title ?? "انقلاب نوری در دنیای تراشه‌ها؛ دانشمندان مسیر حرکت الکترون‌ها را با لیزر کنترل کردند"}
@@ -2101,7 +2101,7 @@ function DivDoeslooksmaxxingworktags() {
 function H2Doeslooksmaxxingworkheadline() {
   const d = useMobileHome();
   return (
-    <div className="min-h-[37px] relative shrink-0 w-full" data-name="h2#Doeslooksmaxxingworkheadline">
+    <div className="h-[37px] overflow-clip relative shrink-0 w-full" data-name="h2#Doeslooksmaxxingworkheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[13px] text-right text-white w-[174px]" href={articleUrl(d?.videos[1]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[18.4px]" dir="auto">
           {d?.videos[1]?.title ?? "از اسکن قرنیه تا شخصی سازی لنز در ۲۰ دقیقه"}
@@ -2249,7 +2249,7 @@ function DivYeonjunperformsGguMotags() {
 function H2YeonjunperformsGguMoheadline() {
   const d = useMobileHome();
   return (
-    <div className="min-h-[37px] relative shrink-0 w-full" data-name="h2#YeonjunperformsGGUMoheadline">
+    <div className="h-[37px] overflow-clip relative shrink-0 w-full" data-name="h2#YeonjunperformsGGUMoheadline">
       <a className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[13.2px] text-right text-white w-[174.91px]" href={articleUrl(d?.videos[2]?.href ?? null) ?? "#"}>
         <p className="cursor-pointer leading-[18.4px]" dir="auto">
           {d?.videos[2]?.title ?? "بازار نرم‌افزارهای مدیریت کربن شتاب گرفت"}
@@ -2660,7 +2660,7 @@ function BoxVideoRow({ index }: { index: number }) {
               </div>
             </div>
           </div>
-          <div className="min-h-[48.28px] relative shrink-0 w-full" data-name="h2.headline">
+          <div className="h-[48.28px] overflow-clip relative shrink-0 w-full" data-name="h2.headline">
             <a
               className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] justify-center leading-[0] not-italic relative text-[12.9px] text-right text-white w-[173.82px]"
               href={articleUrl(v?.href ?? null) ?? "#"}
@@ -2897,8 +2897,8 @@ function DivTedLassoseason4Carditags1() {
 function H3TedLassoseason4Cardiheadline() {
   const d = useMobileHome();
   return (
-    <div className="min-h-[51px] relative shrink-0 w-[362px]" data-name="h3#TedLassoseason4Cardiheadline">
-      <div className="[word-break:break-word] flex flex-col font-['IRANSansX:Bold',sans-serif] min-h-[51px] justify-start leading-[0] not-italic text-[16.7px] text-right text-white top-0 w-[328px]">
+    <div className="h-[51px] overflow-clip relative shrink-0 w-[362px]" data-name="h3#TedLassoseason4Cardiheadline">
+      <div className="-translate-x-full [word-break:break-word] absolute flex flex-col font-['IRANSansX:Bold',sans-serif] h-[51px] justify-start leading-[0] left-[340px] not-italic text-[16.7px] text-right text-white top-0 w-[328px]">
         <p className="leading-[25.3px]" dir="auto">
           <a className="cursor-pointer" href={articleUrl(d?.videos[0]?.href ?? null) ?? "#"}>
             {d?.videos[0]?.title ?? "انقلاب نوری در دنیای تراشه‌ها؛ دانشمندان مسیر حرکت الکترون‌ها را با لیزر کنترل کردند"}
@@ -2911,7 +2911,7 @@ function H3TedLassoseason4Cardiheadline() {
 
 function DivCjafl13() {
   return (
-    <div className="content-stretch flex flex-col min-h-[73px] items-end relative shrink-0" data-name="div.CJAFL">
+    <div className="content-stretch flex flex-col h-[73px] items-end relative shrink-0" data-name="div.CJAFL">
       <DivTedLassoseason4Carditags1 />
       <H3TedLassoseason4Cardiheadline />
     </div>
@@ -2920,7 +2920,7 @@ function DivCjafl13() {
 
 function DivVztd9() {
   return (
-    <div className="content-stretch flex flex-col min-h-[120px] items-start py-[24px] relative shrink-0 w-full" data-name="div.VZTD">
+    <div className="content-stretch flex flex-col h-[120px] items-start py-[24px] relative shrink-0 w-full" data-name="div.VZTD">
       <DivCjafl13 />
     </div>
   );
@@ -2928,7 +2928,7 @@ function DivVztd9() {
 
 function DivLiAe17() {
   return (
-    <div className="content-stretch flex flex-col gap-[8px] items-start rounded-[6px] w-full" data-name="div.liAe">
+    <div className="absolute content-stretch flex flex-col gap-[8px] items-start left-0 right-0 rounded-[6px] top-0" data-name="div.liAe">
       <Video1 />
       <DivVztd9 />
     </div>
@@ -2937,10 +2937,10 @@ function DivLiAe17() {
 
 function DivBlockSingleColumn() {
   return (
-    <div className="relative shrink-0 w-full" data-name="div.block__single-column">
-      <DivLiAe17 />
+    <div className="h-[714.55px] relative shrink-0 w-full" data-name="div.block__single-column">
       <DivPaginationText />
       <Div />
+      <DivLiAe17 />
     </div>
   );
 }
