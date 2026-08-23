@@ -20,15 +20,22 @@ type TickerRow = [string, string, string];
 let cache: { at: number; items: (TickerRow | null)[] } | null = null;
 let refreshing = false;
 
-/** Formats a USD price exactly like the original ticker design.
- *  BTC → "$77,609.82"   ETH → "$2,399.42"   XRP → "$1.43"
+/** Formats a large Toman price compactly so the ticker strip stays clean.
+ *  BTC → "14.5B"   ETH → "455M"   XRP → "278K"
  */
-function formatUsd(price: number): string {
-  const opts =
-    price >= 1
-      ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-      : { minimumFractionDigits: 2, maximumFractionDigits: 4 };
-  return `$${price.toLocaleString("en-US", opts)}`;
+function formatToman(price: number): string {
+  if (price >= 1_000_000_000) {
+    const v = price / 1_000_000_000;
+    return (v >= 100 ? Math.round(v) : v.toFixed(1).replace(/\.0$/, "")) + "B";
+  }
+  if (price >= 1_000_000) {
+    const v = price / 1_000_000;
+    return (v >= 100 ? Math.round(v) : v.toFixed(1).replace(/\.0$/, "")) + "M";
+  }
+  if (price >= 1_000) {
+    return Math.round(price / 1_000) + "K";
+  }
+  return Math.round(price).toLocaleString("en-US");
 }
 
 function formatChange(change: number): string {
@@ -103,12 +110,9 @@ async function refreshAndSave() {
 
     const rows: (TickerRow | null)[] = SYMBOLS.map((symbol, i) => {
       if (wallexMap) {
-        const usdtRate = wallexMap.get("USDT");
         const d = wallexMap.get(symbol);
-        if (d && usdtRate && usdtRate.price > 0) {
-          // Convert Toman → USD using the USDT/TMN market rate from Wallex itself
-          const usdPrice = d.price / usdtRate.price;
-          return [symbol, formatUsd(usdPrice), formatChange(d.change)] as TickerRow;
+        if (d) {
+          return [symbol, formatToman(d.price), formatChange(d.change)] as TickerRow;
         }
       }
       return lastGood?.[i] ?? null;
