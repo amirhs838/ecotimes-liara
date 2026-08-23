@@ -515,7 +515,7 @@ function DesktopPage() {
         )}
       </main>
 
-      <footer className="bg-[#000e2c] text-white">
+      <footer className="bg-[#c93035] text-white">
         <div className="mx-auto max-w-[1280px] px-7 py-12">
           <div className="flex items-start justify-between border-b border-[#969ca8] pb-10">
             <img alt="ECO TIMES" className="h-[86px] w-[140px] object-contain" src={`${API_URL}/ecotimes-logo-white.png`} />

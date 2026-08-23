@@ -5164,7 +5164,7 @@ function SpanCsJky3() {
 function ButtonMLash2() {
   const { setIndex } = useContext(MobileGalleryContext);
   return (
-    <div className="bg-[#e5e6e9] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH" onClick={() => setIndex(-1)}>
+    <div className="bg-[#efe3dc] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH" onClick={() => setIndex(-1)}>
       <SpanCsJky3 />
     </div>
   );
@@ -5173,7 +5173,7 @@ function ButtonMLash2() {
 function Item1Of5Margin() {
   return (
     <div className="content-stretch flex flex-col h-[16px] items-start px-[4px] py-[2px] relative shrink-0 w-[20px]" data-name="Item 1 of 5:margin">
-      <div className="bg-[#0045da] border border-[#0045da] border-solid relative rounded-[6px] shrink-0 size-[12px]" data-name="Item 1 of 5" />
+      <div className="bg-[#990108] border border-[#990108] border-solid relative rounded-[6px] shrink-0 size-[12px]" data-name="Item 1 of 5" />
     </div>
   );
 }
@@ -5224,7 +5224,7 @@ function Item1Of() {
           <div
             className={
               index === i
-                ? "bg-[#0045da] border border-[#0045da] border-solid relative rounded-[6px] shrink-0 size-[12px]"
+                ? "bg-[#990108] border border-[#990108] border-solid relative rounded-[6px] shrink-0 size-[12px]"
                 : "bg-[#e5e6e9] border border-[#e5e6e9] border-solid relative rounded-[4px] shrink-0 size-[8px]"
             }
           />
@@ -5255,7 +5255,7 @@ function Frame31() {
     <div className="relative shrink-0 size-[14px]" data-name="Frame">
       <svg className="absolute block inset-0 size-full" fill="none" height="14" preserveAspectRatio="none" viewBox="0 0 14 14" width="14">
         <g clipPath="url(#clip0_0_18)" id="Frame">
-          <path clipRule="evenodd" d={svgPaths.p37d1300} fill="#0045DA" fillRule="evenodd" id="Vector" />
+          <path clipRule="evenodd" d={svgPaths.p37d1300} fill="#990108" fillRule="evenodd" id="Vector" />
         </g>
         <defs>
           <clipPath id="clip0_0_18">
@@ -5278,7 +5278,7 @@ function SpanCsJky4() {
 function ButtonMLash3() {
   const { setIndex } = useContext(MobileGalleryContext);
   return (
-    <div className="bg-[#e5eeff] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH" onClick={() => setIndex(1)}>
+    <div className="bg-[#efe3dc] content-stretch flex items-center justify-center p-[12px] relative rounded-[32px] shrink-0 size-[32px]" data-name="button.mLASH" onClick={() => setIndex(1)}>
       <SpanCsJky4 />
     </div>
   );
@@ -5726,7 +5726,7 @@ function DivGerEc6() {
 
 function FooterPUpJ() {
   return (
-    <div className="bg-[#000e2c] content-stretch flex h-[570px] items-start justify-center relative shrink-0 w-[390px]" data-name="footer.pUpJ">
+    <div className="bg-[#c93035] content-stretch flex h-[570px] items-start justify-center relative shrink-0 w-[390px]" data-name="footer.pUpJ">
       <DivGerEc6 />
     </div>
   );
