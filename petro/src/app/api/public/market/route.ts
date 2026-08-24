@@ -75,7 +75,7 @@ async function fetchWallexMarkets(): Promise<Map<string, { price: number; change
 
 async function loadSnapshot(): Promise<(TickerRow | null)[] | null> {
   try {
-    const snap = await db.marketSnapshot.findUnique({ where: { id: 1 } });
+    const snap = await (db as any).marketSnapshot.findUnique({ where: { id: 1 } });
     if (!snap || !Array.isArray(snap.items)) return null;
     return snap.items as unknown as (TickerRow | null)[];
   } catch {
@@ -85,7 +85,7 @@ async function loadSnapshot(): Promise<(TickerRow | null)[] | null> {
 
 async function saveSnapshot(items: (TickerRow | null)[]) {
   try {
-    await db.marketSnapshot.upsert({
+    await (db as any).marketSnapshot.upsert({
       where: { id: 1 },
       create: { id: 1, items: items as unknown as object },
       update: { items: items as unknown as object },
