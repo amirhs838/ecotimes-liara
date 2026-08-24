@@ -38,6 +38,8 @@ function MobileFrame() {
 export default function App() {
   return (
     <>
+      {/* SEO: Primary H1 for brand — hidden visually, visible to search engines */}
+      <h1 className="sr-only">اکو تایمز</h1>
       <MobileFrame />
       <div className="hidden lg:block">
         <DesktopPage />

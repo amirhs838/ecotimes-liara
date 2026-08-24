@@ -11,8 +11,6 @@ import {
   absoluteUrl,
   siteDescription,
   siteKeywords,
-  siteName,
-  siteTagline,
   siteUrl,
 } from "@/lib/site";
 
@@ -20,24 +18,24 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   manifest: "/manifest.json",
   title: {
-    default: `${siteName} | ${siteTagline}`,
-    template: `%s | ${siteName}`,
+    default: `اکو تایمز | آخرین اخبار اقتصاد، انرژی و صنعت`,
+    template: `%s | اکو تایمز`,
   },
   description: siteDescription,
   keywords: siteKeywords,
-  authors: [{ name: siteName }],
+  authors: [{ name: "اکو تایمز" }],
   openGraph: {
     type: "website",
-    siteName,
+    siteName: "اکو تایمز",
     locale: "fa_IR",
-    title: `${siteName} | ${siteTagline}`,
+    title: `اکو تایمز | آخرین اخبار اقتصاد، انرژی و صنعت`,
     description: siteDescription,
     url: siteUrl,
-    images: [{ url: absoluteUrl("/og-default.png"), alt: siteName }],
+    images: [{ url: absoluteUrl("/og-default.png"), alt: "اکو تایمز" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteName} | ${siteTagline}`,
+    title: `اکو تایمز | آخرین اخبار اقتصاد، انرژی و صنعت`,
     description: siteDescription,
   },
 };

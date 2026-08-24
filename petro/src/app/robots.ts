@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { siteUrl } from "@/lib/site";
 
 // Public pages (news articles, categories) are crawlable; the admin panel and
 // API routes are off-limits for search engines.
@@ -8,10 +7,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/news/", "/category/"],
+        allow: ["/", "/news/", "/category/", "/about"],
         disallow: ["/admin", "/api", "/_next/"],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: "https://eco-times.ir/sitemap.xml",
   };
 }

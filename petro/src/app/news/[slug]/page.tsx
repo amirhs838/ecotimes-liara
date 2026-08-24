@@ -141,10 +141,10 @@ export default async function NewsPage({ params }: Params) {
     image: ogImage ? [absoluteUrl(ogImage)] : undefined,
     datePublished: publishedAt.toISOString(),
     dateModified: new Date(post.updatedAt).toISOString(),
-    author: { "@type": "Organization", name: siteName },
+    author: { "@type": "Organization", name: "اکو تایمز" },
     publisher: {
       "@type": "Organization",
-      name: siteName,
+      name: "اکو تایمز",
       logo: {
         "@type": "ImageObject",
         url: absoluteUrl("/og-default.png"),

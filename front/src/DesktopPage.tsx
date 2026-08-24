@@ -1,4 +1,4 @@
-import advertiseImage from "./imports/DivScrollSpyContainer/9c3bea2ab16af8de0d4b67b15f6646a6b15243bc.png";
+﻿import advertiseImage from "./imports/DivScrollSpyContainer/9c3bea2ab16af8de0d4b67b15f6646a6b15243bc.png";
 import wallexImage from "./imports/DivScrollSpyContainer/6334ff254527b64d0a4b3e95213654683cd6fabe.png";
 import coinBtcImage from "./imports/DivScrollSpyContainer/c05bf090b9669767870e5de4641445ccc4eb261c.png";
 import coinEthImage from "./imports/DivScrollSpyContainer/ba64993282e1849c68688dc61507ba8d638efc1d.png";
@@ -156,7 +156,7 @@ function DesktopHeader() {
           >
             {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
-          <img alt="ECO TIMES" className="h-[80px] w-[107px] object-contain" src={logoImage} />
+          <img alt="اکو تایمز" className="h-[80px] w-[107px] object-contain" src={logoImage} />
           <button aria-label="جستجو" className="grid size-11 place-items-center" type="button">
             <SearchIcon />
           </button>
@@ -518,7 +518,7 @@ function DesktopPage() {
       <footer className="bg-[#c93035] text-white">
         <div className="mx-auto max-w-[1280px] px-7 py-12">
           <div className="flex items-start justify-between border-b border-[#969ca8] pb-10">
-            <img alt="ECO TIMES" className="h-[86px] w-[140px] object-contain" src={`${API_URL}/ecotimes-logo-white.png`} />
+            <img alt="اکو تایمز" className="h-[86px] w-[140px] object-contain" src={`${API_URL}/ecotimes-logo-white.png`} />
             <div className="flex gap-20 text-[14px] font-bold">
               <a href="#">درباره ما</a><a href="#">ارتباط با ما</a><a href="#">پیوند ها</a>
             </div>

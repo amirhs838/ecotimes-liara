@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
-import { siteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -20,21 +19,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
       db.category.findMany({ select: { slug: true } }),
     ]);
+    const base = "https://eco-times.ir";
     return [
       {
-        url: siteUrl,
+        url: base,
         lastModified: new Date(),
         changeFrequency: "hourly",
         priority: 1,
       },
+      {
+        url: `${base}/about`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      },
       ...categories.map((c) => ({
-        url: `${siteUrl}/category/${c.slug}`,
+        url: `${base}/category/${c.slug}`,
         lastModified: new Date(),
         changeFrequency: "daily" as const,
         priority: 0.8,
       })),
       ...posts.map((p) => ({
-        url: `${siteUrl}/news/${p.slug}`,
+        url: `${base}/news/${p.slug}`,
         lastModified: p.updatedAt,
         changeFrequency: "daily" as const,
         priority: 0.7,
@@ -44,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fallback for build-time without DB (Liara Docker build)
     return [
       {
-        url: siteUrl,
+        url: "https://eco-times.ir",
         lastModified: new Date(),
         changeFrequency: "hourly",
         priority: 1,

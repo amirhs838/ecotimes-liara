@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { decodeParam } from "@/lib/url-param";
-import { absoluteUrl, siteName } from "@/lib/site";
+import { absoluteUrl } from "@/lib/site";
 import { faDate, faDigits } from "@/lib/post-format";
 import { getHomeSectionPosts, getLiveStream, getNavCategories } from "@/lib/home-data";
 import SiteHeader from "@/components/petro/site-header";
@@ -34,13 +34,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = absoluteUrl(`/category/${category.slug}`);
   return {
     title: category.name,
-    description: `آرشیو اخبار و تحلیل‌های ${category.name} در ${siteName}`,
+    description: `آرشیو اخبار و تحلیل‌های ${category.name} در اکو تایمز`,
     alternates: { canonical },
     openGraph: {
-      title: `${category.name} | ${siteName}`,
-      description: `آرشیو اخبار و تحلیل‌های ${category.name} در ${siteName}`,
+      title: `${category.name} | اکو تایمز`,
+      description: `آرشیو اخبار و تحلیل‌های ${category.name} در اکو تایمز`,
       url: canonical,
-      siteName,
+      siteName: "اکو تایمز",
       type: "website",
     },
   };

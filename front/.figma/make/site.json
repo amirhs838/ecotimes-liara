@@ -1,6 +1,6 @@
 {
-  "title": "اکوتایمز | پایگاه خبری اقتصاد و فناوری",
-  "description": "اکوتایمز، پایگاه خبری اقتصاد و فناوری؛ تازه‌ترین اخبار و تحلیل‌های هوش مصنوعی، اقتصاد دیجیتال، سلامت و درمان، زیست‌فناوری و نانو، میکروالکترونیک، انرژی، آب و محیط‌زیست، امنیت غذایی و صنایع خلاق.",
+  "title": "اکو تایمز | آخرین اخبار اقتصاد، انرژی و صنعت",
+  "description": "اکو تایمز؛ مرجع اخبار و تحلیل‌های روز اقتصاد، انرژی، صنعت و بازار ایران. تازه‌ترین اخبار و گزارش‌ها را در اکو تایمز دنبال کنید.",
   "language": "fa",
   "robots": {
     "index": true
@@ -9,7 +9,7 @@
     "icon": "/icon.png"
   },
   "customScripts": {
-    "headStart": "<!-- seo --><meta property=\"og:type\" content=\"website\" /><meta property=\"og:url\" content=\"https://ecotimes-front.vercel.app/\" /><meta property=\"og:locale\" content=\"fa_IR\" /><meta property=\"og:site_name\" content=\"اکوتایمز\" /><meta property=\"og:image\" content=\"https://ecotimes-front.vercel.app/og-default.png\" /><meta name=\"twitter:card\" content=\"summary_large_image\" /><meta name=\"twitter:title\" content=\"اکوتایمز | پایگاه خبری اقتصاد و فناوری\" /><meta name=\"twitter:description\" content=\"اکوتایمز، پایگاه خبری اقتصاد و فناوری؛ تازه‌ترین اخبار و تحلیل‌های هوش مصنوعی، اقتصاد دیجیتال، سلامت و درمان، زیست‌فناوری و نانو، میکروالکترونیک، انرژی، آب و محیط‌زیست، امنیت غذایی و صنایع خلاق.\" /><meta name=\"twitter:image\" content=\"https://ecotimes-front.vercel.app/og-default.png\" /><link rel=\"canonical\" href=\"https://ecotimes-front.vercel.app/\" /><meta name=\"theme-color\" content=\"#ffffff\" /><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"NewsMediaOrganization\",\"name\":\"اکوتایمز\",\"alternateName\":\"EcoTimes\",\"url\":\"https://ecotimes-front.vercel.app\",\"logo\":{\"@type\":\"ImageObject\",\"url\":\"https://ecotimes-front.vercel.app/og-default.png\"},\"sameAs\":[],\"inLanguage\":\"fa-IR\"}</script><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":\"اکوتایمز | پایگاه خبری اقتصاد و فناوری\",\"url\":\"https://ecotimes-front.vercel.app\",\"inLanguage\":\"fa-IR\"}</script><!-- /seo -->"
+    "headStart": "<!-- seo --><meta property=\"og:type\" content=\"website\" /><meta property=\"og:url\" content=\"https://eco-times.ir/\" /><meta property=\"og:locale\" content=\"fa_IR\" /><meta property=\"og:site_name\" content=\"اکو تایمز\" /><meta property=\"og:image\" content=\"https://eco-times.ir/og-default.png\" /><meta name=\"twitter:card\" content=\"summary_large_image\" /><meta name=\"twitter:title\" content=\"اکو تایمز | آخرین اخبار اقتصاد، انرژی و صنعت\" /><meta name=\"twitter:description\" content=\"اکو تایمز؛ مرجع اخبار و تحلیل‌های روز اقتصاد، انرژی، صنعت و بازار ایران. تازه‌ترین اخبار و گزارش‌ها را در اکو تایمز دنبال کنید.\" /><meta name=\"twitter:image\" content=\"https://eco-times.ir/og-default.png\" /><link rel=\"canonical\" href=\"https://eco-times.ir/\" /><meta name=\"theme-color\" content=\"#ffffff\" /><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":\"اکو تایمز\",\"alternateName\":\"Eco Times\",\"url\":\"https://eco-times.ir/\",\"inLanguage\":\"fa-IR\"}</script><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"Organization\",\"name\":\"اکو تایمز\",\"alternateName\":\"Eco Times\",\"url\":\"https://eco-times.ir/\",\"logo\":{\"@type\":\"ImageObject\",\"url\":\"https://eco-times.ir/og-default.png\"},\"sameAs\":[]}</script><!-- /seo -->"
   },
   "accessibility": {
     "addBypassLinks": false,

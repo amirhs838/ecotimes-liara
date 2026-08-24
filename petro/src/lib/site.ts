@@ -1,19 +1,20 @@
 // Site-wide constants used for SEO, canonical URLs and absolute links.
 // Brand is configurable via env so the same codebase can power any news site.
 
-export const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "اکوتایمز";
-export const siteNameEn = process.env.NEXT_PUBLIC_SITE_NAME_EN ?? "EcoTimes";
+export const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "اکو تایمز";
+export const siteNameEn = process.env.NEXT_PUBLIC_SITE_NAME_EN ?? "Eco Times";
 export const siteTagline =
   process.env.NEXT_PUBLIC_SITE_TAGLINE ?? "پایگاه خبری اقتصاد و فناوری";
 export const siteDescription =
   process.env.NEXT_PUBLIC_SITE_DESCRIPTION ??
-  "اکوتایمز، پایگاه خبری اقتصاد و فناوری؛ تازه‌ترین اخبار و تحلیل‌های هوش مصنوعی، اقتصاد دیجیتال، سلامت و درمان، زیست‌فناوری و نانو، میکروالکترونیک، انرژی، آب و محیط‌زیست، امنیت غذایی و صنایع خلاق.";
+  "اکو تایمز؛ مرجع اخبار و تحلیل‌های روز اقتصاد، انرژی، صنعت و بازار ایران. تازه‌ترین اخبار و گزارش‌ها را در اکو تایمز دنبال کنید.";
 export const siteKeywords = (
-  process.env.NEXT_PUBLIC_SITE_KEYWORDS ?? "اکوتایمز,اخبار اقتصاد,اخبار فناوری,هوش مصنوعی,اقتصاد دیجیتال,انرژی,زیست‌فناوری"
+  process.env.NEXT_PUBLIC_SITE_KEYWORDS ??
+  "اکو تایمز,اکوتایمز,Eco Times,eco-times,اخبار اقتصاد,اخبار فناوری,هوش مصنوعی,اقتصاد دیجیتال,انرژی"
 ).split(",");
 
 export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://eco-times.ir"
 ).replace(/\/$/, "");
 
 /** Turns a path (or already-absolute URL) into an absolute site URL. */

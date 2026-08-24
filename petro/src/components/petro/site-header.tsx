@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, type ReactNode } from "react";
 import type { NavItem } from "@/lib/home-data";
@@ -225,7 +225,7 @@ function DesktopHeader({ nav, market }: { nav: NavItem[]; market: MarketItem[] |
             {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="ECO TIMES" className="h-[80px] w-[107px] object-contain" src="/ecotimes-logo.png" />
+          <img alt="اکو تایمز" className="h-[80px] w-[107px] object-contain" src="/ecotimes-logo.png" />
           <button aria-label="جستجو" className="grid size-11 place-items-center" type="button">
             <SearchIcon />
           </button>
