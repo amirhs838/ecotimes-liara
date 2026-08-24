@@ -426,14 +426,14 @@ export default function SiteFooter() {
   return (
     <>
       {/* Desktop — verbatim port from front/src/DesktopPage.tsx */}
-      <footer className="hidden bg-[#000e2c] text-white lg:block">
+      <footer className="hidden bg-[#c93035] text-white lg:block">
         <div className="mx-auto px-7 py-12">
           <div className="flex items-start justify-between border-b border-[#969ca8] pb-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="ECO TIMES" className="h-[86px] w-[140px] object-contain" src="/ecotimes-logo-white.png" />
+            <img alt="اکو تایمز" className="h-[86px] w-[140px] object-contain" src="/ecotimes-logo-white.png" />
             <div className="flex gap-20 text-[14px] font-bold">
-              <a href="#">درباره ما</a>
-              <a href="#">ارتباط با ما</a>
+              <a href="/about">درباره ما</a>
+              <a href="/about">ارتباط با ما</a>
               <a href="#">پیوند ها</a>
             </div>
           </div>

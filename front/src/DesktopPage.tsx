@@ -261,7 +261,7 @@ function DesktopPage() {
                 <PostImage className="aspect-[16/8.2] w-full" post={heroPost} />
                 <div className="p-7">
                   {heroPost.kicker && <p className="text-[15px] font-medium text-[#990108]">{heroPost.kicker}</p>}
-                  <h1 className="mt-3 text-[37px] font-bold leading-[1.35] tracking-[-1px]">{heroPost.title}</h1>
+                  <h2 className="mt-3 text-[37px] font-bold leading-[1.35] tracking-[-1px]">{heroPost.title}</h2>
                   {heroPost.lead && (
                     <p className="mt-4 max-w-[760px] text-[16px] font-medium leading-8 text-[#22252a]">{heroPost.lead}</p>
                   )}
@@ -520,7 +520,7 @@ function DesktopPage() {
           <div className="flex items-start justify-between border-b border-[#969ca8] pb-10">
             <img alt="اکو تایمز" className="h-[86px] w-[140px] object-contain" src={`${API_URL}/ecotimes-logo-white.png`} />
             <div className="flex gap-20 text-[14px] font-bold">
-              <a href="#">درباره ما</a><a href="#">ارتباط با ما</a><a href="#">پیوند ها</a>
+              <a href="/about">درباره ما</a><a href="/about">ارتباط با ما</a><a href="#">پیوند ها</a>
             </div>
           </div>
           <div className="flex items-end justify-between gap-10 pt-8 text-[#e5e6e9]">
