@@ -10,7 +10,7 @@ export const siteDescription =
   "اکو تایمز؛ مرجع اخبار و تحلیل‌های روز اقتصاد، انرژی، صنعت و بازار ایران. تازه‌ترین اخبار و گزارش‌ها را در اکو تایمز دنبال کنید.";
 export const siteKeywords = (
   process.env.NEXT_PUBLIC_SITE_KEYWORDS ??
-  "اکو تایمز,اکوتایمز,Eco Times,eco-times,اخبار اقتصاد,اخبار فناوری,هوش مصنوعی,اقتصاد دیجیتال,انرژی"
+  "اکو تایمز,اکوتایمز,Eco Times,eco-times,eco-times.ir,اخبار اقتصاد,اخبار فناوری,هوش مصنوعی,اقتصاد دیجیتال,انرژی"
 ).split(",");
 
 export const siteUrl = (
