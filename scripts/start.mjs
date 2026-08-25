@@ -155,10 +155,26 @@ createServer((req, res) => {
   console.log(`[front] serving front/dist on http://localhost:${port} (proxy -> ${backend.origin})`);
 });
 
-const child = spawn("npm", ["run", "start"], {
-  cwd: join(base, "petro"),
-  shell: true,
+// Standalone Next.js server (created by `next build` with output:'standalone')
+// In the Docker image this lives at /app/petro-standalone/server.js.
+const standaloneServer = existsSync(join(base, "petro-standalone", "server.js"))
+  ? join(base, "petro-standalone", "server.js")
+  : join(base, "petro", ".next", "standalone", "server.js");
+
+if (!existsSync(standaloneServer)) {
+  console.error("[start] standalone server not found — expected petro-standalone/server.js or petro/.next/standalone/server.js");
+  process.exit(1);
+}
+
+const child = spawn(process.execPath, [standaloneServer], {
+  cwd: dirname(standaloneServer),
   stdio: ["ignore", "pipe", "pipe"],
+  env: {
+    ...process.env,
+    PORT: "3001",
+    HOSTNAME: "0.0.0.0",
+    NODE_ENV: "production",
+  },
 });
 const pipe = (data) => {
   for (const line of data.toString().split(/\r?\n/)) {
