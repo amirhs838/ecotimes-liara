@@ -12,6 +12,11 @@ let failListeners = new Set<(failed: boolean) => void>();
 let homePromise: Promise<HomeData | void> | null = null;
 let homeTimer: ReturnType<typeof setInterval> | null = null;
 
+function notifyFailed(failed: boolean) {
+  homeFailed = failed;
+  failListeners.forEach((listener) => listener(failed));
+}
+
 function readHomeCache(allowStale = false): HomeData | null {
   try {
     const raw = localStorage.getItem(HOME_CACHE_KEY);
