@@ -46,13 +46,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 
 # Standalone server (minimal node_modules + compiled app) at /app/petro/.next/standalone
+# Layout: server.js at root, static at .next/static, public at ./public
 COPY --from=base /app/petro/.next/standalone ./petro-standalone
 
-# Static assets served by Next
-COPY --from=base /app/petro/.next/static ./petro-standalone/petro/.next/static
+# Static assets served by Next (JS chunks/CSS) — goes to .next/static at standalone root
+COPY --from=base /app/petro/.next/static ./petro-standalone/.next/static
 
-# Public assets (logos, verify file, llms.txt)
-COPY --from=base /app/petro/public ./petro-standalone/petro/public
+# Public assets (logos, verify file, llms.txt) — goes to ./public at standalone root
+COPY --from=base /app/petro/public ./petro-standalone/public
 
 # Frontend dist (self-contained)
 COPY --from=base /app/front/dist ./front/dist
