@@ -9,11 +9,8 @@ let homeCache: HomeData | null = null;
 let homeFailed = false;
 let homeListeners = new Set<(data: HomeData | null) => void>();
 let failListeners = new Set<(failed: boolean) => void>();
-
-function notifyFailed(failed: boolean) {
-  homeFailed = failed;
-  failListeners.forEach((listener) => listener(failed));
-}
+let homePromise: Promise<HomeData | void> | null = null;
+let homeTimer: ReturnType<typeof setInterval> | null = null;
 
 function readHomeCache(allowStale = false): HomeData | null {
   try {
@@ -29,21 +26,29 @@ function readHomeCache(allowStale = false): HomeData | null {
   }
 }
 
-async function refreshHome() {
-  try {
-    const payload = await fetchHomeData();
-    homeCache = payload;
-    notifyFailed(false);
+async function refreshHome(): Promise<void> {
+  if (homePromise) return homePromise as Promise<void>;
+  homePromise = (async () => {
     try {
-      localStorage.setItem(HOME_CACHE_KEY, JSON.stringify({ at: Date.now(), data: payload }));
+      const payload = await fetchHomeData();
+      homeCache = payload;
+      notifyFailed(false);
+      try {
+        localStorage.setItem(HOME_CACHE_KEY, JSON.stringify({ at: Date.now(), data: payload }));
+      } catch {
+        // storage full/unavailable — module cache is enough
+      }
     } catch {
-      // storage full/unavailable — module cache is enough
+      // keep showing the stale cache on failure
+      notifyFailed(true);
     }
-  } catch {
-    // keep showing the stale cache on failure
-    notifyFailed(true);
+    homeListeners.forEach((listener) => listener(homeCache));
+  })();
+  try {
+    await homePromise;
+  } finally {
+    homePromise = null;
   }
-  homeListeners.forEach((listener) => listener(homeCache));
 }
 
 export function useHomeData(): HomeData | null {
@@ -55,11 +60,17 @@ export function useHomeData(): HomeData | null {
       const stored = readHomeCache(true);
       if (stored) setData(stored);
     }
-    refreshHome();
-    const timer = setInterval(refreshHome, 90_000);
+    // Singleton refresh — first mounter triggers fetch, rest just subscribe
+    if (homeTimer === null) {
+      refreshHome();
+      homeTimer = setInterval(refreshHome, 90_000);
+    }
     return () => {
       homeListeners.delete(setData);
-      clearInterval(timer);
+      if (homeListeners.size === 0 && homeTimer !== null) {
+        clearInterval(homeTimer);
+        homeTimer = null;
+      }
     };
   }, []);
 

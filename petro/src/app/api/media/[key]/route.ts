@@ -15,6 +15,9 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Browser Accept check: serve WebP when supported (images only)
+const WEBP_ACCEPT = /image\/webp/;
+
 // Public media serving.
 // - s3:    redirect to the CDN URL when the bucket is public, otherwise proxy
 //          the object through S3 credentials (range requests supported).
@@ -82,6 +85,43 @@ async function proxyS3Media(
   }
 }
 
+// Fetch a raster image from S3 and convert to WebP on the fly (sharp).
+// Falls back to the original if conversion fails — never breaks rendering.
+async function convertImageToWebP(
+  req: NextRequest,
+  key: string,
+  mimeType: string
+): Promise<Response> {
+  try {
+    const out = await getS3Client().send(
+      new GetObjectCommand({ Bucket: s3Config().bucket, Key: key })
+    );
+    const chunks: Buffer[] = [];
+    const body = out.Body as unknown as AsyncIterable<Uint8Array>;
+    for await (const chunk of body) chunks.push(Buffer.from(chunk));
+    const original = Buffer.concat(chunks);
+
+    const sharp = (await import("sharp")).default;
+    const webp = await sharp(original, { failOn: "none" })
+      .rotate()
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    return new Response(new Uint8Array(webp), {
+      status: 200,
+      headers: {
+        "Content-Type": "image/webp",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Length": String(webp.length),
+      },
+    });
+  } catch (e) {
+    // Fallback to original proxy on any conversion failure
+    return proxyS3Media(req, key, mimeType);
+  }
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ key: string }> }
@@ -97,6 +137,15 @@ export async function GET(
   }
 
   if (media.provider === "s3") {
+    // Video: always proxy (range + CORS), never redirect to direct S3 URL
+    if (media.mimeType.startsWith("video/")) {
+      return proxyS3Media(req, key, media.mimeType);
+    }
+    // Image + browser supports WebP: proxy + convert on the fly
+    const accept = req.headers.get("accept") ?? "";
+    if (media.mimeType.startsWith("image/") && WEBP_ACCEPT.test(accept)) {
+      return convertImageToWebP(req, key, media.mimeType);
+    }
     const base = s3PublicBase();
     if (base) {
       const url = `${base}/${key}`;

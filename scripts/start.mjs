@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer, request as httpRequest } from "node:http";
+import { createGzip } from "node:zlib";
 import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -123,6 +124,20 @@ function serveStatic(req, res) {
     filePath.includes(`${normalize("/assets/")}`) || filePath.includes("\\assets\\")
       ? "public, max-age=31536000, immutable"
       : "no-cache";
+
+  // gzip text responses (HTML/CSS/JS/JSON/XML/SVG) to cut transfer size
+  const compressible = /text\/|application\/json|application\/xml|application\/javascript|image\/svg/.test(type);
+  const acceptGzip = /\bgzip\b/.test(req.headers["accept-encoding"] || "");
+  if (compressible && acceptGzip) {
+    res.writeHead(200, {
+      "Content-Type": type,
+      "Cache-Control": cache,
+      "Content-Encoding": "gzip",
+      "Vary": "Accept-Encoding",
+    });
+    createReadStream(filePath).pipe(createGzip()).pipe(res);
+    return;
+  }
   res.writeHead(200, { "Content-Type": type, "Cache-Control": cache });
   createReadStream(filePath).pipe(res);
 }

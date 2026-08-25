@@ -1,3 +1,4 @@
+import React from "react";
 import { absoluteAsset, type HomePost } from "./lib/api";
 
 // Silent looping autoplay for UPLOADED video posts on the homepage video box.
@@ -21,15 +22,36 @@ export default function AutoPlayVideo({
   if (!post.isUploadedVideo) return null;
   const src = absoluteAsset(post.videoUrl);
   if (!src) return null;
+  const poster = absoluteAsset(post.imageUrl);
+  // Lazy-load: only set src when in viewport
+  const [inView, setInView] = React.useState(false);
+  const ref = React.useRef<HTMLVideoElement>(null);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el || inView) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setInView(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [inView]);
   return (
     <video
+      ref={ref}
       className={`pointer-events-none size-full object-cover ${className}`}
-      src={src}
-      autoPlay
+      src={inView ? src : undefined}
+      poster={poster}
+      autoPlay={inView}
       muted
       loop
       playsInline
-      preload="auto"
+      preload="none"
       onTimeUpdate={(e) => {
         if (e.currentTarget.currentTime >= LOOP_SECONDS) e.currentTarget.currentTime = 0;
       }}

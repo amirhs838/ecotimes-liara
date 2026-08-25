@@ -85,10 +85,27 @@ function StoryLink({
   );
 }
 
-function PostImage({ post, className = "" }: { post: HomePost; className?: string }) {
+function PostImage({
+  post,
+  className = "",
+  eager = false,
+}: {
+  post: HomePost;
+  className?: string;
+  eager?: boolean;
+}) {
   const src = absoluteAsset(post.imageUrl);
   if (!src) return <div className={`${className} bg-[#f4f5f6]`} aria-label={post.imageAlt} />;
-  return <img alt={post.imageAlt} className={`${className} object-cover`} src={src} />;
+  return (
+    <img
+      alt={post.imageAlt}
+      className={`${className} object-cover`}
+      src={src}
+      loading={eager ? "eager" : "lazy"}
+      decoding={eager ? "sync" : "async"}
+      {...(eager ? { fetchPriority: "high" as const } : {})}
+    />
+  );
 }
 
 function SectionHeading({ children, dark = false }: { children: string; dark?: boolean }) {
@@ -258,7 +275,7 @@ function DesktopPage() {
           <article className="col-span-8 overflow-hidden rounded-[6px] bg-[#f4f5f6]">
             {heroPost && (
               <StoryLink block href={articleUrl(heroPost.href)}>
-                <PostImage className="aspect-[16/8.2] w-full" post={heroPost} />
+                <PostImage className="aspect-[16/8.2] w-full" post={heroPost} eager />
                 <div className="p-7">
                   {heroPost.kicker && <p className="text-[15px] font-medium text-[#990108]">{heroPost.kicker}</p>}
                   <h2 className="mt-3 text-[37px] font-bold leading-[1.35] tracking-[-1px]">{heroPost.title}</h2>
