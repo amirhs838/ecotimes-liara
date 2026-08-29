@@ -1,69 +1,77 @@
-﻿# راهنمای دیپلوی EcoTimes روی لیارا از طریق گیتهاب (برای ایجنت هوش مصنوعی)
+﻿# راهنمای دیپلوی EcoTimes روی لیارا از طریق گیتهاب — پرامپت آماده برای ایجنت هوش مصنوعی
 
-این فایل یک پرامپت کامل برای ایجنتی است که باید پروژه ecotimes (یا مشابه) را از صفر روی لیارا دیپلوی کند.
+> این فایل دقیقا روشی است که پروژه ecotimes با موفقیت روی لیارا دیپلوی شد. آن را به هر ایجنت AI بده تا از صفر همین کار را برای پروژه مشابه تکرار کند.
 
 ---
 
-## پرامپت برای ایجنت
+## پرامپت برای ایجنت (کپی کن و بده به ایجنت)
 
+```
 تو یک Senior DevOps برای پروژه ecotimes هستی. پروژه یک monorepo است:
-- `petro/` : Next.js 16 + Prisma 6 + PostgreSQL (پورت 3001) — شامل API و پنل ادمین
-- `front/` : Vite 8 + React 19 (پورت 3000) — SPA
-- `scripts/start.mjs` : در پروداکشن هر دو را با هم اجرا میکند (front/dist روی PORT و petro روی 3001)
-- `package.json` روت: `build` => `petro build + front build`, `start` => `node scripts/start.mjs`
+- petro/ : Next.js 16.1 + Prisma 6 + PostgreSQL (پورت 3001) — API + پنل ادمین + next.config با output: 'standalone'
+- front/ : Vite 8 + React 19 (پورت 3000) — SPA که بیلدش می‌شود front/dist
+- scripts/start.mjs : launcher پروداکشن — front/dist را روی PORT (3000) سرو می‌کند و petro standalone را روی 3001 اجرا و /api /_next /admin /news /category را پروکسی می‌کند
+- package.json روت: build => petro build + front build، start => node scripts/start.mjs
 
-**محدودیت لیارا:** هر دیپلوی 256MB سورس + 15 دقیقه بیلد.
+محدودیت لیارا: سورس هر دیپلوی 256MB + بیلد 15 دقیقه (عملا 20 دقیقه برای Docker). با petro/node_modules (982MB) و ویدیوها (67MB) حتما تایم‌اوت می‌خوری.
 
-**وظیفه:** پروژه را از صفر روی لیارا (Node + Postgres + S3) دیپلوی کن، طوری که ورسل دست نخورد.
+وظیفه: پروژه را از صفر روی لیارا (App Node + DB Postgres + S3) دیپلوی کن طوری که ورسل (project prj_uVEVQuX5 / prj_ORumcjz + Neon DB) دست نخورد. فقط لیارا.
 
-### مرحله 0: اطلاعات مورد نیاز از کاربر را بپرس
-از کاربر بخواه:
-1. API Token لیارا (از console.liara.ir > API Tokens)
-2. آیا DB و S3 از قبل ساخته شده؟ اگر نه، نام و پلن
-3. آیا میخواهد S3 جدید بسازد یا از همین c463335 استفاده کند؟ (کلیدهای S3)
-4. دامنه نهایی (eco-times.ir یا همون ecotimes.liara.run)
-5. ADMIN_EMAIL / ADMIN_PASSWORD و SESSION_SECRET (یا خودت بساز)
-
-### مرحله 1: نصب Liara CLI (پرتابل)
-پروژه از Node پرتابل در `PROJECT/.runtime/node-v22.18.0-win-x64` استفاده میکند. اگر `npm`/`liara` پیدا نشد:
-```
-$root = "C:\Users\central store\Desktop\PROJECT\.runtime\node-v22.18.0-win-x64"
-$node = "$root\node.exe"
-$cli = "$root\node_modules\@liara\cli\bin\run.js"
-& $node $cli --version  # باید 9.5.1 باشد
-# اگر نصب نبود:
-& $node "$root\node_modules\npm\bin\npm-cli.js" install -g @liara/cli
+مراحل را دقیقا به ترتیب زیر انجام بده، هر مرحله را verify کن و لاگ بگیر:
 ```
 
-### مرحله 2: لاگین
+### مرحله 0 — اطلاعات مورد نیاز از کاربر را بپرس
+
+قبل از هر کاری بپرس:
+1. `LIARA_API_TOKEN` (از console.liara.ir > API Tokens — توکن JWT)
+2. آیا App و DB روی لیارا ساخته شده؟ اگر نه، نام و پلن (ما: App `ecotimes` medium-g2، DB `loving-colden-1rbld2ume-db` postgres 16.14، شبکه `my-network`)
+3. کلیدهای S3 (ما: endpoint `c463335.parspack.net` bucket `c463335` — کلیدها را از کنسول پارس‌پک بگیر)
+4. دامنه نهایی (ما: `eco-times.ir` و `ecotimes.liara.run`)
+5. `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `SESSION_SECRET` (اگر ندارد بساز: `openssl rand -base64 32`)
+6. `GH_TOKEN` برای ریپو `ecotimes-liara` (کلاسیک `ghp_xxx` با scope repo)
+
+### مرحله 1 — نصب و آماده‌سازی Liara CLI پرتابل
+
+پروژه از Node پرتابل استفاده می‌کند (نه Node سیستم):
 ```
-$token = "LIARA_API_TOKEN"
+$runtime = "C:\Users\central store\Desktop\PROJECT\.runtime\node-v22.18.0-win-x64"
+$node = "$runtime\node.exe"
+$cli  = "$runtime\node_modules\@liara\cli\bin\run.js"
+& $node --version        # باید v22.18.0
+& $node $cli --version   # باید 9.5.1 — اگر نبود:
+& $node "$runtime\node_modules\npm\bin\npm-cli.js" install -g @liara/cli
+$env:Path = "$runtime;" + $env:Path
+```
+
+### مرحله 2 — لاگین لیارا (نکته VPN)
+
+```
+$token = "LIARA_API_TOKEN_JWT"
 "hesaria38" | & $node $cli login --api-token $token
-# چک: & $node $cli app:list  باید app ecotimes را نشان دهد
+& $node $cli app:list   # باید ecotimes را ببینی
+& $node $cli db:list    # باید loving-colden-1rbld2ume-db را ببینی
 ```
 
-**نکته VPN:** لیارا با IP ایران IP فیلتر نیست، اما `api.liara.ir` برای آپلود به VPN خاموش نیاز دارد. برای کار با GitHub (api.github.com:443) به VPN روشن و `DefaultWebProxy = null` نیاز داری:
-```
-[System.Net.WebRequest]::DefaultWebProxy = New-Object System.Net.WebProxy($null)
-```
-برای هر درخواست به `api.github.com` این را ست کن، برای `api.liara.ir` بگذار روی حالت عادی یا null بسته به VPN.
+**نکته حیاتی VPN:**
+- برای `api.liara.ir` (آپلود) باید **VPN خاموش** باشد وگرنه `write ECONNRESET`.
+- برای `api.github.com:443` (push/status) باید **VPN روشن** و پروکسی را خنثی کنی:
+  ```
+  [System.Net.WebRequest]::DefaultWebProxy = New-Object System.Net.WebProxy($null)
+  ```
+  برای هر درخواست به `api.github.com` این خط را اجرا کن. برای `api.liara.ir` برعکس (VPN OFF).
 
-### مرحله 3: چک منابع لیارا
-```
-& $node $cli app:list          # باید ecotimes node medium-g2 را ببینی
-& $node $cli db:list           # باید loving-colden-1rbld2ume-db postgres را ببینی
-# اگر نیست، بساز:
-# - App: NodeJS 22, نام ecotimes, پلن medium-g2
-# - DB: Postgres 16.14, نام loving-colden-... , volume 10GB
-# DB publicNetwork=true => اتصال: postgresql://root:<pass>@sahand.liara.cloud:31941/postgres
-# برای یافتن پسورد و هاست:
-# fetch('https://api.liara.ir/v1/databases/<id>', {headers:{Authorization:'Bearer '+token}}).then(r=>r.json()).then(j=>console.log(j.database.root_password, j.database.port, j.database.network.node.host))
-```
+اگر App/DB نبود:
+- App: کنسول لیارا > ساخت اپ > NodeJS 22 > نام ecotimes > پلن medium-g2 > شبکه my-network
+- DB: Postgres 16.14 > نام loving-colden... > volume 10GB > publicNetwork true
+  برای یافتن host/port/pass بعد از ساخت:
+  ```
+  fetch('https://api.liara.ir/v1/databases/<id>', {headers:{Authorization:'Bearer '+token}}).then(r=>r.json()).then(j=>console.log(j.database.root_password, j.database.port, j.database.network.node.host))
+  # ما: root / <DB_PASS> / sahand.liara.cloud:31941 / postgres (پسورد را از API لیارا بگیر)
+  ```
 
-### مرحله 4: فایل‌های دیپلوی
-اطمینان حاصل کن این فایل‌ها درست هستند و **ورسل را دست نزن**:
+### مرحله 3 — فایل‌های دیپلوی (ورسل را دست نزن)
 
-**liara.json (روت):**
+**liara.json (روت) — دقیقا همین:**
 ```json
 {
   "app": "ecotimes",
@@ -73,11 +81,50 @@ $token = "LIARA_API_TOKEN"
 }
 ```
 
-**Dockerfile (روت):** از node:22-bookworm-slim استفاده کن، openssl نصب کن، deps را با `npm --prefix petro ci || npm --prefix petro install` نصب کن (front هم همینطور)، `prisma generate` بزن، `ARG DATABASE_URL` dummy برای بیلد، `npm run build` (petro+front)، سپس stage دوم فقط `petro/.next/standalone`, `petro/.next/static`, `petro/public` (بدون videos 67MB و images 13MB که در .dockerignore هستند), `front/dist`, `scripts`.
+**Dockerfile (روت) — standalone (سریع، بدون کپی 982MB node_modules):**
+```dockerfile
+FROM node:22-bookworm-slim AS base
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV CI=true
+RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY petro/prisma ./petro/prisma
+COPY petro/prisma.config.ts ./petro/prisma.config.ts
+COPY petro/package.json petro/package-lock.json ./petro/
+COPY front/package.json ./front/package.json
+COPY package.json ./
+RUN npm --prefix petro ci --include=optional 2>/dev/null || npm --prefix petro install --include=optional
+RUN npm --prefix front ci 2>/dev/null || npm --prefix front install
+COPY scripts ./scripts
+COPY petro ./petro
+COPY front ./front
+RUN npm --prefix petro run db:generate
+ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ARG POSTGRES_PRISMA_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ARG NEXT_PUBLIC_SITE_URL=https://eco-times.ir
+ARG NEXT_PUBLIC_SITE_NAME=اکو تایمز
+ENV DATABASE_URL=$DATABASE_URL
+ENV POSTGRES_PRISMA_URL=$POSTGRES_PRISMA_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_NAME=$NEXT_PUBLIC_SITE_NAME
+RUN npm --prefix petro run build && npm --prefix front run build
+FROM node:22-bookworm-slim AS runner
+WORKDIR /app
+RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+COPY --from=base /app/petro/.next/standalone ./petro-standalone
+COPY --from=base /app/petro/.next/static ./petro-standalone/.next/static
+COPY --from=base /app/petro/public ./petro-standalone/public
+COPY --from=base /app/front/dist ./front/dist
+COPY --from=base /app/scripts ./scripts
+EXPOSE 3000
+CMD ["node","scripts/start.mjs"]
+```
+نکته: `petro/next.config.ts` باید `output: 'standalone'` داشته باشد (commit f5c603f). وگرنه `COPY --from=base /app/petro/.next/standalone` فیل می‌شود.
 
-**مهم: .liaraignore و .dockerignore باید petro/public/videos و petro/public/images را exclude کنند تا سورس از 100MB به 12MB بیاید، وگرنه تایم‌اوت میشی.**
-
-**.liaraignore/.dockerignore نمونه:**
+**.dockerignore و .liaraignore — باید شامل باشند (وگرنه سورس 100MB و تایم‌اوت):**
 ```
 node_modules
 petro/node_modules
@@ -92,38 +139,81 @@ petro/storage
 petro/public/images
 petro/public/videos
 backups
+reference-design
 .git
 ```
 
-### مرحله 5: ENVهای لیارا (فقط لیارا، نه ورسل)
-```
-& $node $cli env:set --app ecotimes -f DATABASE_URL=postgresql://root:<pass>@sahand.liara.cloud:31941/postgres POSTGRES_PRISMA_URL=...?connection_limit=1 SESSION_SECRET=<random 32b> ADMIN_EMAIL=admin@ecotimes.ir ADMIN_PASSWORD=... NEXT_PUBLIC_SITE_URL=https://ecotimes.liara.run NEXT_PUBLIC_SITE_NAME="اکو تایمز" ... S3_ENDPOINT=https://c463335.parspack.net S3_BUCKET=c463335 S3_ACCESS_KEY=... S3_SECRET_KEY=... S3_PUBLIC_URL=https://c463335.parspack.net/c463335 MAX_IMAGE_UPLOAD_MB=25 ...
-```
-**تاکید:** این env فقط روی لیارا ست میشود، `petro/.env.local` ورسل دست نخورد.
+**scripts/start.mjs — باید:**
+- front/dist را روی `PORT` (3000) سرو کند،
+- `petro-standalone/server.js` (یا `petro/.next/standalone/server.js` برای fallback لوکال) را با `spawn(process.execPath, [server], {env:{PORT:3001}})` اجرا کند،
+- `host` و `x-forwarded-host` را در `proxy()` حفظ کند وگرنه لاگین 403 `درخواست نامعتبر (CSRF)` می‌دهد (فیکس 8c1752d).
 
-### مرحله 6: دیتابیس - Migrate + Restore
-DB لیارا خالی است. باید:
-1. `petro/prisma/migrations` را اعمال کنی. `npx prisma migrate deploy` با VPN روی sahand گیر میکند، پس مستقیم با `pg` و split-by-semicolon و هر statement با یک Client جدید اجرا کن (تا هنگ نکند). اگر ستون `order` در HomeSection کم بود، `ALTER TABLE "HomeSection" ADD COLUMN "order" INTEGER NOT NULL DEFAULT 0` بزن. جدول‌های کمبود مثل PostCategory, MarketSnapshot, UploadSession/Chunk را هم دستی بساز.
-2. سپس `backups/backup-2026-08-21-portable/1-full-data.json` (یا `3-inserts.sql`) را با `ON CONFLICT DO NOTHING` و `pg` per-row/per-batch بریز (MarketSnapshot items را به صورت JSON stringified با `::jsonb` بریز).
+### مرحله 4 — ENVهای لیارا (فقط لیارا، هرگز petro/.env ورسل را بازنویسی نکن)
 
-**تعداد نهایی باید:** Admin 1, Category 10, HomeSection 10, Media 59, Post 61, SectionPlacement 37, Tag 2, etc.
-
-### مرحله 7: دیپلوی
 ```
-# VPN را خاموش کن (برای آپلود به api.liara.ir) و بزن:
-$env:Path="C:\Users\central store\Desktop\PROJECT\.runtime\node-v22.18.0-win-x64;"+$env:Path
-liara deploy --app ecotimes --path "C:\Users\central store\Desktop\ecotimes - Copy (2)" --port 3000
-# یا از طریق گیتهاب:
-# 1. ریپو بساز: POST https://api.github.com/user/repos {name:"ecotimes-liara", private:true}
-# 2. git init, add, commit, push به https://<GH_TOKEN>@github.com/<user>/ecotimes-liara.git
-# 3. workflow .github/workflows/liara.yaml بساز که `liara deploy` بزند (از LIARA_API_TOKEN secret)
-# 4. Secret LIARA_API_TOKEN را در GitHub repo settings/secrets/actions بساز (با tweetsodium seal)
+& $node $cli env:set --app ecotimes -f `
+  DATABASE_URL=postgresql://root:<DB_PASS>@sahand.liara.cloud:31941/postgres `
+  POSTGRES_PRISMA_URL=postgresql://root:<DB_PASS>@sahand.liara.cloud:31941/postgres?connection_limit=1 `
+  SESSION_SECRET=<SESSION_SECRET> `
+  ADMIN_EMAIL=admin@ecotimes.ir `
+  ADMIN_PASSWORD=<ADMIN_PASSWORD> `
+  NEXT_PUBLIC_SITE_URL=https://eco-times.ir `
+  NEXT_PUBLIC_SITE_NAME="اکو تایمز" `
+  NEXT_PUBLIC_SITE_NAME_EN="Eco Times" `
+  S3_ENDPOINT=https://c463335.parspack.net `
+  S3_BUCKET=c463335 `
+  S3_ACCESS_KEY=<S3_ACCESS_KEY> `
+  S3_SECRET_KEY=<S3_SECRET_KEY> `
+  S3_PUBLIC_URL=https://c463335.parspack.net/c463335 `
+  MAX_IMAGE_UPLOAD_MB=25
+# مقادیر <...> را از کاربر/کنسول بگیر — هرگز توکن واقعی را در گیت کامیت نکن
 ```
 
-**ساختار workflow:**
+### مرحله 5 — دیتابیس: Migrate + Restore (دو مرحله جدا)
+
+DB لیارا خالی است. `npx prisma migrate deploy` مستقیم روی `sahand.liara.cloud:31941` با VPN هنگ می‌کند، پس با `pg` دستی بزن:
+
+1. **Migrate:** هر فایل `petro/prisma/migrations/*/migration.sql` را بخوان، با `;` اسپلیت کن، هر statement را با یک `new Client({connectionString})` جدا اجرا کن (نه یک تراکنش بزرگ). اگر خطای `column "order" does not exist` گرفتی:
+   ```
+   ALTER TABLE "HomeSection" ADD COLUMN "order" INTEGER NOT NULL DEFAULT 0;
+   ```
+   و جدول‌های `PostCategory`, `MarketSnapshot`, `UploadSession`, `UploadChunk` را اگر نبودند بساز (از `schema.prisma`).
+
+2. **Restore:** فایل `backups/backup-2026-08-21-portable/1-full-data.json` (یا `3-inserts.sql`) را با `ON CONFLICT DO NOTHING` بریز. برای `MarketSnapshot.items` باید `JSON.stringify(items)+'::jsonb'` بفرستی. هر ردیف با یک Client جدید (یا batch 20 تایی).
+
+تعداد نهایی باید (verify با `SELECT count(*) FROM "Post"` etc):
+`Admin 1, Category 10, HomeSection 10, Media 59-89, Post 61-68, SectionPlacement 37, Tag 2`
+
+### مرحله 6 — دیپلوی از طریق گیتهاب (روش اصلی که جواب داد)
+
+**6-1: ساخت ریپو (اگر نبود) — با GitHub API و VPN روشن:**
+```
+[System.Net.WebRequest]::DefaultWebProxy = New-Object System.Net.WebProxy($null)
+$gh="<GH_TOKEN>"  # ghp_xxx را از کاربر بگیر — هرگز هاردکد نکن
+Invoke-RestMethod -Uri https://api.github.com/user/repos `
+  -Method POST -Headers @{Authorization="Bearer $gh"; "User-Agent"="node"} `
+  -Body (@{name="ecotimes-liara"; private=$true} | ConvertTo-Json) -ContentType "application/json"
+# اگر 422 یعنی از قبل exists
+```
+
+**6-2: پوش سورس — روش A (اگر git نصب است):**
+```
+git init (اگر .git نبود)
+git remote add origin https://<GH_TOKEN>@github.com/amirhs838/ecotimes-liara.git
+git add -A
+git commit -m "deploy: ..."
+git push -u origin main
+```
+
+**روش B (وقتی git.exe نیست — همان که ما استفاده کردیم):** با `api.github.com/repos/.../contents/<path>` و PUT با `content: base64(utf8)` و `sha` (اگر فایل exists). برای فولدرها باید درخت git بسازی (`/git/trees` + `/git/commits` + `PATCH /git/refs/heads/main`) یا ساده‌تر: فایل به فایل PUT کن.
+
+**6-3: Workflow — `.github/workflows/liara.yaml` (باید همین باشد):**
 ```yaml
 name: CD-Liara
-on: {push: {branches: [main]}}
+on:
+  push:
+    branches:
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -131,21 +221,54 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with: {node-version: "22"}
-      - run: npm i -g @liara/cli@9
-        run: liara deploy --app="ecotimes" --api-token="$LIARA_TOKEN" --port 3000 --no-app-logs
+      - name: update-liara
+        env:
+          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+        run: |
+          npm i -g @liara/cli@9
+          liara deploy --app="ecotimes" --api-token="$LIARA_TOKEN" --port 3000 --no-app-logs
 ```
 
-### مرحله 8: نکات حیاتی
-- **ورسل ایزوله:** هرگز `vercel` CLI نزن، `.vercel` و `.env` را بازنویسی نکن.
-- **S3:** Parspack S3 با `forcePathStyle: true`, `maxAttempts:2`, `NodeHttpHandler 5s/15s`, `requestChecksumCalculation: WHEN_REQUIRED` (در `petro/src/lib/storage.ts:60`).
-- **Prisma:** در Dockerfile حتما `openssl` نصب کن و `binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]` در schema.prisma بگذار.
-- **Build:** `next build` با Turbopack روی لیارا 15-20 دقیقه طول میکشد؛ اگر تایم‌اوت خورد، `petro/public/videos` را از .dockerignore حذف کن.
-- **CSRF:** `scripts/start.mjs` باید `host` و `x-forwarded-host` را حفظ کند، وگرنه login 403 میده.
-- **سایت‌مپ/ربات:** فقط URLهای `https://eco-times.ir` canonical.
+**6-4: ست Secret روی گیتهاب (LIARA_API_TOKEN):**
+با libsodium seal کن:
+```
+# 1. GET /repos/amirhs838/ecotimes-liara/actions/secrets/public-key -> key, key_id
+# 2. sodium.seal(token, key) -> encrypted
+# 3. PUT /repos/.../actions/secrets/LIARA_API_TOKEN {encrypted_value, key_id}
+```
+یا از کنسول گیتهاب: Settings > Secrets and variables > Actions > New repository secret.
 
-### مرحله 9: تست نهایی
+بعد از push به main، در `https://github.com/amirhs838/ecotimes-liara/actions` باید workflow سبز شود (5-12 دقیقه). اگر `Build timed out` خورد، چک کن `.dockerignore` شامل `petro/public/videos` باشد و Dockerfile standalone باشد.
+
+### مرحله 7 — تست نهایی
+
 ```
-curl https://ecotimes.liara.run/api/public/home  # 200
-curl https://ecotimes.liara.run/admin/login       # 200 -> redirect
-# لاگین با admin@ecotimes.ir / Lv2in2Efzl3z30i باید 200 بده
+curl https://eco-times.ir/api/public/home          # 200 JSON
+curl https://eco-times.ir/_next/static/...          # 200
+curl https://eco-times.ir/admin/login               # 200
+curl https://eco-times.ir/api/media/<key>.jpg       # 200 image/jpeg (S3)
+# لاگین: admin@ecotimes.ir / Lv2in2Efzl3z30i
+& $node $cli app:logs --app ecotimes --since "5m ago"
 ```
+
+### نکات طلایی که ما یاد گرفتیم
+
+- S3: در `petro/src/lib/storage.ts:60` باید `forcePathStyle:true`, `maxAttempts:2`, `NodeHttpHandler 5s/15s`, `requestChecksumCalculation:WHEN_REQUIRED` باشد (Parspack).
+- Prisma binaryTargets در `schema.prisma` حتما `["native","debian-openssl-1.1.x","debian-openssl-3.0.x"]`.
+- `front/package-lock.json` را در `.gitignore` بگذار (ما از pnpm استفاده می‌کنیم) وگرنه diff بزرگ پوش می‌شود.
+- `liara.json` platform باید `docker` باشد (نه `node`) چون دو سرویس داریم.
+- هرگز `vercel` CLI نزن و `.vercel/project.json` را تغییر نده.
+
+---
+
+## اطلاعات محیط فعلی (برای کپی)
+
+- Liara App: `ecotimes` (docker, port 3000, location iran, cache true) — `sahand.liara.cloud`
+- DB: `loving-colden-1rbld2ume-db` postgres 16.14 `sahand.liara.cloud:31941` `postgresql://root:<DB_PASS>@sahand.liara.cloud:31941/postgres`
+- S3 فعال: `c463335.parspack.net` bucket `c463335`
+- دامنه: `eco-times.ir` (canonical) + `ecotimes.liara.run`
+- GH Repo: `amirhs838/ecotimes-liara` branch `main` — token در .git/config با placeholder <GH_TOKEN> نگه دار
+- Node پرتابل: `C:\Users\central store\Desktop\PROJECT\.runtime\node-v22.18.0-win-x64` (CLI 9.5.1)
+
+فایل‌های مرجع موفق: commit `0c45c31` (standalone static/public fix) و `8d8e12d` (آخرین main).
+
