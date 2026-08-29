@@ -25,3 +25,5 @@ front/*.png
 front/*.pdf
 front/*.svg
 front/*.zip
+
+front/package-lock.json
